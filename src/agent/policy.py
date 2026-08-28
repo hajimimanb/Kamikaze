@@ -92,7 +92,7 @@ class RiichiPolicy:
                   % (len(missing), "event_attn/ctx_gate" if any("event_attn" in k or "ctx_gate" in k for k in missing) else "?"))
         if unexpected:
             print("policy: unexpected keys:", len(unexpected))
-        self.model.eval().to(self.device)
+        self.model.float().eval().to(self.device)   # float()：兼容 fp16 分发模型
         self.thr, self.temp, self.bias = load_calibration(ckpt)
         # 动态 bias 持久化（评审必改 1）：RL ckpt 存训练期每池归中的 bias，
         # 加载时覆盖 calibration 静态值——否则验收 eval 用 SL 尺度 bias 作用在
