@@ -71,6 +71,33 @@ python tools/rl_panel_server.py   # render 循环 + http.server 8090
 # 浏览器打开 http://127.0.0.1:8090/rl_train_panel.html
 ```
 
+### 方式 E：使用训练好的 AI 模型
+
+加载 checkpoint 让模型决策（与引擎对局 / 接入外部环境）：
+
+```python
+from agent.policy import RiichiPolicy
+from env.riichi_game import RiichiGame, RiichiConfig
+
+# 1) 加载模型（需要先训练或放置 ckpt；支持 --event-attn 旁支）
+policy = RiichiPolicy("checkpoints/sl/rl/rl_v1.pt", seed=0, use_event_attn=True)
+
+# 2) 单步决策：
+obs = game.state.get_observation()
+action = policy.act(obs)                 # 确定性部署（阈值判定）
+# 或采样（探索）：action, logp, value, ent = policy.sample_with_logp(obs, temperature=1.0)
+
+# 3) 整局对战（AI 坐 0 位，其余随机）：
+game = RiichiGame(RiichiConfig(), seed=42)
+while game.phase != "game_end":
+    game.step(policy(game) if game.turn == 0 else game.random_action())
+
+# 4) 接入引擎事件注意力：policy(game) 会自动传入真实时间线事件
+```
+
+**说明**：checkpoint 文件较大（~122MB），未随仓库分发——需按"方式 B"训练产出，
+或自行放置到 `checkpoints/sl/rl/rl_v1.pt`。
+
 ## 模型架构
 
 ### 主干：MultiHeadRiichiNet（src/model/net.py）
@@ -125,9 +152,18 @@ r = Φ差分(局面→最终pt)
 | 计划 / 已完成 | 10,000 局 / 500 epoch；**4,293 局 / 214 epoch（约 43%）** |
 | 稳定性 | ratio≈1.000、KL 0.001–0.14、clip <5%（无失控）|
 
-**vs-SL**（vs transfer_final 1v3，滑动评估采样）：pt 加权胜率 0.27–0.79、每百局 pt **−1533~+2433**、rank 0.25–0.53——互有胜负、未稳定收敛。
+**模型表现**（4293 局 / 49,544 轮统计）：
 
-**当前打法（副露流）**：副露 1.48 次/轮、门清吃 75–85%、碰 43–56%、杠 12–81%、立直 60–90%、门清默和仅 1.5%、和率 19.3%/放铳 14.5%。
+| 指标 | 数值 |
+|---|---|
+| **副露** | **17.1 次/局**（1.48 次/轮）——副露流打法 |
+| **和牌分布** | 副露和 **75.0%** / 立直和 23.5% / 默听和 1.5% |
+| **和铳率** | 和牌率 19.3% / 放铳率 14.5%（每轮）|
+| **平均和点 / 平均铳点** | **5,164 点 / 4,587 点** |
+| **vs-SL 平均顺位** | **2.50**（n=728 局，均势 2.5）|
+| vs-历史版本平均顺位 | 2.62（n=1,030 局）|
+
+**vs-SL 滑动评估**（独立评估进程，100 局口径）：pt 加权胜率 0.27–0.79、每百局 pt **−1533~+2433**、rank 0.25–0.53——互有胜负、未稳定收敛。
 
 ## 目录结构
 ```
