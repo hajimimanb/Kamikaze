@@ -3,10 +3,12 @@
 Default ruleset = Tenhou Houou / Majsoul Ouja standard:
 - kuitan ON (open tanyao), aka dora ON (3 red fives)
 - kuikae OFF (no swap-calling)
-- kiriage mangan ON
-- atamahane ON (head bump; double/triple ron OFF by default)
+- kiriage mangan OFF (Tenhou: no round-up mangan)
+- double ron ON (Tenhou: double ron exists; triple ron = ron3 abortive draw;
+  atamahane only applies when double_ron=False)
 - nagashi mangan (configurable, default ON)
-- double yakuman counting ON, kazoe yakuman capped at single yakuman
+- double yakuman counting OFF (Tenhou: all yakuman single, suuankou-tanki /
+  kokushi-13 included); kazoe yakuman capped at single yakuman
 
 Wall layout (136 ids in draw order, MT19937 seeded shuffle):
 - indices 0..121   live wall, drawn front to back

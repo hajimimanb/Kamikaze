@@ -17,14 +17,15 @@
 
 ### 方式 A：只使用规则引擎（mjai 协议）
 
-引擎不依赖任何训练产物，单独导入即可驱动对局：
+引擎不依赖任何训练产物，单独导入即可驱动对局。引擎在 `src/` 下，示例需在仓库根目录用
+项目 venv 运行（或 `PYTHONPATH=src`）：`cd 仓库根目录 && .venv/Scripts/python.exe your_script.py`
 
 ```python
 from env.riichi_game import RiichiGame, RiichiConfig
 
 game = RiichiGame(RiichiConfig(), seed=42)     # 新建一局（东四局制）
 while game.phase != "game_end":
-    obs = game.state.get_observation()          # 可观察状态（手牌/牌河/副露/宝牌…）
+    obs = game.state.get_observation()          # 可观察状态（手牌/牌河/副露/宝牌…）；无参=当前决策者
     la = game.legal_actions()                   # 合法动作（discard/riichi/pon/chi/kan/ron/tsumo…）
     # 由你的决策者给出动作（mjai 风格字典）：
     action = game.random_action()               # 或 game.step({"type": "discard", "tile": 0})
@@ -37,11 +38,26 @@ while game.phase != "game_end":
 - 切牌/立直：`{"type": "discard", "tile": 0}` / `{"type": "riichi", "tile": 5}`
 - 吃/碰/杠：`{"type": "pon", "tiles": [1, 2, 3]}` / `{"type": "chow", "tiles": [...]}` / `{"type": "kan", "tiles": [...]}`
 - 和/过：`{"type": "ron"}` / `{"type": "tsumo"}` / `{"type": "pass"}`
-- 牌编码：0–135 整数（0=1m…33=9m, 34=1p…67=9p, 68=1s…101=9s, 102=1z…135=7z），
-  与 mjai 牌串互转：`mjai_pai(tile)` / `parse_mjai_pai("1m")`
+- 牌编码：tile136 整数 0–135，满足 `tile = kind×4 + copy`（每种牌 4 个 id，copy=0..3）：
+  - kind 0–33：0-8=1m-9m、9-17=1p-9p、18-26=1s-9s、27-30=E/S/W/N、31-33=白/發/中
+  - 例：1m=0-3，2m=4-7，…，9m=32-35，1p=36-39，…，7z(中)=132-135
+  - 赤宝牌固定 id：赤5m=16、赤5p=52、赤5s=88（kind 4/13/22 的 copy 0）
+  - 与 mjai 牌串互转：`mjai_pai(tile)`（如 16→"5mr"）/ `parse_mjai_pai("1m")`
 
-**事件流**：mjai JSON（含 `start_kyoku`/`dahai`/`reach`/`pon`/`chi`/`kan`/`hora`/`ryuukyoku`/`end_game`），
+**事件流**：mjai JSON（`start_kyoku`/`tsumo`/`dahai`/`reach`/`chi`/`pon`/`ankan`/`daiminkan`/`kakan`/`dora`/`hora`/`ryuukyoku`/`end_kyoku`/`end_game`；
+杠事件按 `ankan`（暗杠）、`daiminkan`（大明杠）、`kakan`（加杠）区分，鸣牌事件含 `consumed`/`from` 字段），
 与 [mjai.app](https://github.com/mjai/mjai) 协议对齐，可直接对接外部对局环境。
+
+**默认规则**（`RiichiConfig()`，与天凤逐条 oracle 验证一致）：
+- 赤宝牌 ON、喰断（副露断幺）ON、喰替（换吃）OFF
+- **双响（double ron）ON**；三响 = 三家和流局（无结算、庄家连庄、立直棒保留）
+- **无切上满贯**（kiriage OFF，天凤无切上）；**役满单倍**（无双重役满，含四暗刻单骑/国士十三面）
+- 暗杠不可抢（含国士）；仅加杠（kakan）可被枪杠
+- 流局：九种九牌 / 四风连打 / 四杠散 / 四家立直 / 三家和；流局满贯（nagashi）ON
+- 西入 ON（南四局后全员低于返し 30000 继续西场，庄家过线即止）；连庄制和（agari-yame）ON
+- 起分 25000 / 返し 30000
+可按规则集覆盖：`RiichiConfig(kiriage_mangan=True, double_ron=False, atamahane=True, double_yakuman=True, ...)`
+（`atamahane` 仅在 `double_ron=False` 时生效）。
 
 ### 方式 B：训练 AI
 
@@ -189,7 +205,7 @@ r = Φ差分(局面→最终pt)
 src/   → agent/policy.py, env/riichi_game.py, model/(net/features/rl_reward/train_rl_vec/…), tenhou/, riichi/
 tools/ → eval_vs_sl, eval_sliding, train_reward_pred, rl_train_dashboard, start_rl_train, rl_watchdog, …
 docs/  → 架构/方案/规则差异/数据许可文档
-tests/ → 引擎 oracle 回归测试（244 项）
+tests/ → 引擎 oracle 回归测试（28 文件 / 65 个测试函数）
 ```
 
 ## 数据集
