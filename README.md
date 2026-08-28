@@ -171,8 +171,8 @@ r = Φ差分(局面→最终pt)
 ```
 
 ### PPO 自对弈（src/model/train_rl_vec.py）
-- 向量化并行 8 局；对手池 self 60% / past 25%（历史版本）/ SL 15%
-- PPO：clip 0.15、GAE(0.99, 0.95)、KL 早停 0.3、稀有动作加权 ≤4×、熵 0.06
+- 向量化并行（`--vec`，默认 4 局）；对手池 self 60% / past 25%（历史版本）/ SL 15%
+- PPO：clip 0.2、GAE(0.99, 0.95)、KL 早停 0.5、稀有动作加权 ≤8×、熵 0.01
 - bias-snap 归中防头冻结/两极分化；head_z_cap 软限幅防失控
 - always_win 阶段：荣和/自摸强制（先学"能和就和"）
 
@@ -228,7 +228,7 @@ tests/ → 引擎 oracle 回归测试（28 文件 / 65 个测试函数）
 
 ## 数据与许可
 - 训练数据：天凤（Tenhou）公开对局日志（详见 docs/data_license_check.md）
-- 引擎与天凤规则差异（12 处，oracle 验证）：docs/tenhou_rules_authoritative.md
+- 引擎与天凤规则差异（完整差异清单，高优先级项已对齐、剩余低优先项见文档）：docs/tenhou_rules_authoritative.md
 
 ## 致谢与参考
 - 架构参考：Suphx（arXiv:2003.13590）、mjai 协议、mahjong 库
