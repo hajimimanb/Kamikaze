@@ -1,4 +1,4 @@
-# Riichi Mahjong AI（日麻 AI）
+# Kamikaze — Riichi Mahjong AI（神风 · 日麻 AI）
 
 基于天凤（Tenhou）真实对局数据，自研引擎 + 深度学习模型的日麻 AI 决策系统。
 核心路线：**Tenhou 数据 → 特征工程 → SL 迁移 → Φ 全局奖励预测 → PPO 自对弈强化学习 → 综合评估**。
