@@ -1,0 +1,11 @@
+# riichi-ai deps (append-only per docs/observation_schema.md section 8)
+# torch (RTX 5070 Blackwell sm_120 requires cu128+ build). VERIFIED 2026-08-25:
+#   pip install "torch==2.13.0+cu130" --index-url https://download.pytorch.org/whl/cu130
+#   (pytorch.org direct download stalls; wheel also on mirror.sjtu.edu.cn:
+#    https://mirror.sjtu.edu.cn/pytorch-wheels/cu130/torch-2.13.0%2Bcu130-cp312-cp312-win_amd64.whl
+#    sha256=2efab1e83604ca628c6d85b9e188c153690980498d1297081a9dad704919303c)
+# CPU fallback (pypi mirror): pip install torch==2.13.0
+numpy
+pytest
+mahjong==2.0.0  # engine-developer: env/riichi_game.py + riichi/explain.py use the 2.0 API (HandCalculator/Shanten/Agari); battle-tested shanten/agari (src/tenhou/shanten_tmp.py wrapper uses the same)
+mjai==0.2.1  # schema §7.5 protocol validation. WARNING: mjai's METADATA declares mahjong~=1.2.0 but mjai imports/parses fine with mahjong 2.0.0 (verified 2026-08-25, full 244-test suite green). Do NOT downgrade mahjong to satisfy mjai's constraint; if pip ever flips it back, re-run: pip install mahjong==2.0.0

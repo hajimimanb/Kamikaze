@@ -1,0 +1,1031 @@
+{
+  "contract": "docs/observation_schema.md v1.1",
+  "modes": {
+    "simple": {
+      "n_channels": 17,
+      "groups": {
+        "hand": 5,
+        "dora": 2,
+        "basic": 10
+      },
+      "channels": [
+        {
+          "index": 0,
+          "group": "hand",
+          "name": "hand_count1",
+          "description": "手牌中该牌种持有张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 1,
+          "group": "hand",
+          "name": "hand_count2",
+          "description": "手牌中该牌种持有张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 2,
+          "group": "hand",
+          "name": "hand_count3",
+          "description": "手牌中该牌种持有张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 3,
+          "group": "hand",
+          "name": "hand_count4",
+          "description": "手牌中该牌种持有张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 4,
+          "group": "hand",
+          "name": "hand_red5",
+          "description": "手牌含赤5（万/筒/索）标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 5,
+          "group": "dora",
+          "name": "dora_indicators",
+          "description": "可见宝牌指示牌计数（含杠宝指示，最大5）",
+          "quant_max": 5.0
+        },
+        {
+          "index": 6,
+          "group": "dora",
+          "name": "dora_kinds",
+          "description": "指示牌对应的宝牌种类计数（上限4）",
+          "quant_max": 4.0
+        },
+        {
+          "index": 7,
+          "group": "basic",
+          "name": "last_draw",
+          "description": "刚摸的牌标记（摸后决策点）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 8,
+          "group": "basic",
+          "name": "seat_wind",
+          "description": "自风 one-hot（列 27-30 = 东南西北）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 9,
+          "group": "basic",
+          "name": "prevalent_wind",
+          "description": "场风 one-hot（东/南）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 10,
+          "group": "basic",
+          "name": "round",
+          "description": "局数归一化（0..7 -> 0..1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 11,
+          "group": "basic",
+          "name": "honba",
+          "description": "本场数归一化",
+          "quant_max": 1.0
+        },
+        {
+          "index": 12,
+          "group": "basic",
+          "name": "riichi_sticks",
+          "description": "立直棒数归一化",
+          "quant_max": 1.0
+        },
+        {
+          "index": 13,
+          "group": "basic",
+          "name": "wall_left",
+          "description": "牌山剩余归一化（0..70）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 14,
+          "group": "basic",
+          "name": "own_score_bucket",
+          "description": "自身点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 15,
+          "group": "basic",
+          "name": "rank",
+          "description": "自身顺位归一化（1位=0）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 16,
+          "group": "basic",
+          "name": "is_oya",
+          "description": "是否亲家",
+          "quant_max": 1.0
+        }
+      ]
+    },
+    "full": {
+      "n_channels": 126,
+      "groups": {
+        "hand": 5,
+        "dora": 2,
+        "basic": 10,
+        "dora_tier": 8,
+        "visible": 4,
+        "discards": 36,
+        "melds": 24,
+        "state": 37
+      },
+      "channels": [
+        {
+          "index": 0,
+          "group": "hand",
+          "name": "hand_count1",
+          "description": "手牌中该牌种持有张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 1,
+          "group": "hand",
+          "name": "hand_count2",
+          "description": "手牌中该牌种持有张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 2,
+          "group": "hand",
+          "name": "hand_count3",
+          "description": "手牌中该牌种持有张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 3,
+          "group": "hand",
+          "name": "hand_count4",
+          "description": "手牌中该牌种持有张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 4,
+          "group": "hand",
+          "name": "hand_red5",
+          "description": "手牌含赤5（万/筒/索）标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 5,
+          "group": "dora",
+          "name": "dora_indicators",
+          "description": "可见宝牌指示牌计数（含杠宝指示，最大5）",
+          "quant_max": 5.0
+        },
+        {
+          "index": 6,
+          "group": "dora",
+          "name": "dora_kinds",
+          "description": "指示牌对应的宝牌种类计数（上限4）",
+          "quant_max": 4.0
+        },
+        {
+          "index": 7,
+          "group": "basic",
+          "name": "last_draw",
+          "description": "刚摸的牌标记（摸后决策点）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 8,
+          "group": "basic",
+          "name": "seat_wind",
+          "description": "自风 one-hot（列 27-30 = 东南西北）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 9,
+          "group": "basic",
+          "name": "prevalent_wind",
+          "description": "场风 one-hot（东/南）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 10,
+          "group": "basic",
+          "name": "round",
+          "description": "局数归一化（0..7 -> 0..1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 11,
+          "group": "basic",
+          "name": "honba",
+          "description": "本场数归一化",
+          "quant_max": 1.0
+        },
+        {
+          "index": 12,
+          "group": "basic",
+          "name": "riichi_sticks",
+          "description": "立直棒数归一化",
+          "quant_max": 1.0
+        },
+        {
+          "index": 13,
+          "group": "basic",
+          "name": "wall_left",
+          "description": "牌山剩余归一化（0..70）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 14,
+          "group": "basic",
+          "name": "own_score_bucket",
+          "description": "自身点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 15,
+          "group": "basic",
+          "name": "rank",
+          "description": "自身顺位归一化（1位=0）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 16,
+          "group": "basic",
+          "name": "is_oya",
+          "description": "是否亲家",
+          "quant_max": 1.0
+        },
+        {
+          "index": 17,
+          "group": "dora_tier",
+          "name": "dora_indicators_n1",
+          "description": "宝牌指示牌计数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 18,
+          "group": "dora_tier",
+          "name": "dora_indicators_n2",
+          "description": "宝牌指示牌计数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 19,
+          "group": "dora_tier",
+          "name": "dora_indicators_n3",
+          "description": "宝牌指示牌计数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 20,
+          "group": "dora_tier",
+          "name": "dora_indicators_n4",
+          "description": "宝牌指示牌计数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 21,
+          "group": "dora_tier",
+          "name": "dora_kinds_n1",
+          "description": "宝牌种类计数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 22,
+          "group": "dora_tier",
+          "name": "dora_kinds_n2",
+          "description": "宝牌种类计数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 23,
+          "group": "dora_tier",
+          "name": "dora_kinds_n3",
+          "description": "宝牌种类计数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 24,
+          "group": "dora_tier",
+          "name": "dora_kinds_n4",
+          "description": "宝牌种类计数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 25,
+          "group": "visible",
+          "name": "visible_n1",
+          "description": "全桌可见该牌种张数 >= 1（手牌+副露+牌河+宝牌指示）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 26,
+          "group": "visible",
+          "name": "visible_n2",
+          "description": "全桌可见该牌种张数 >= 2（手牌+副露+牌河+宝牌指示）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 27,
+          "group": "visible",
+          "name": "visible_n3",
+          "description": "全桌可见该牌种张数 >= 3（手牌+副露+牌河+宝牌指示）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 28,
+          "group": "visible",
+          "name": "visible_n4",
+          "description": "全桌可见该牌种张数 >= 4（手牌+副露+牌河+宝牌指示）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 29,
+          "group": "discards",
+          "name": "discard_n1_s0",
+          "description": "座位0 牌河该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 30,
+          "group": "discards",
+          "name": "discard_n2_s0",
+          "description": "座位0 牌河该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 31,
+          "group": "discards",
+          "name": "discard_n3_s0",
+          "description": "座位0 牌河该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 32,
+          "group": "discards",
+          "name": "discard_n4_s0",
+          "description": "座位0 牌河该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 33,
+          "group": "discards",
+          "name": "discard_tsumogiri_s0",
+          "description": "座位0 牌河摸切标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 34,
+          "group": "discards",
+          "name": "discard_riichi_s0",
+          "description": "座位0 牌河立直宣言牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 35,
+          "group": "discards",
+          "name": "discard_red_s0",
+          "description": "座位0 牌河赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 36,
+          "group": "discards",
+          "name": "discard_early_s0",
+          "description": "座位0 前6巡内切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 37,
+          "group": "discards",
+          "name": "discard_late_s0",
+          "description": "座位0 第12巡及之后切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 38,
+          "group": "discards",
+          "name": "discard_n1_s1",
+          "description": "座位1 牌河该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 39,
+          "group": "discards",
+          "name": "discard_n2_s1",
+          "description": "座位1 牌河该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 40,
+          "group": "discards",
+          "name": "discard_n3_s1",
+          "description": "座位1 牌河该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 41,
+          "group": "discards",
+          "name": "discard_n4_s1",
+          "description": "座位1 牌河该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 42,
+          "group": "discards",
+          "name": "discard_tsumogiri_s1",
+          "description": "座位1 牌河摸切标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 43,
+          "group": "discards",
+          "name": "discard_riichi_s1",
+          "description": "座位1 牌河立直宣言牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 44,
+          "group": "discards",
+          "name": "discard_red_s1",
+          "description": "座位1 牌河赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 45,
+          "group": "discards",
+          "name": "discard_early_s1",
+          "description": "座位1 前6巡内切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 46,
+          "group": "discards",
+          "name": "discard_late_s1",
+          "description": "座位1 第12巡及之后切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 47,
+          "group": "discards",
+          "name": "discard_n1_s2",
+          "description": "座位2 牌河该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 48,
+          "group": "discards",
+          "name": "discard_n2_s2",
+          "description": "座位2 牌河该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 49,
+          "group": "discards",
+          "name": "discard_n3_s2",
+          "description": "座位2 牌河该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 50,
+          "group": "discards",
+          "name": "discard_n4_s2",
+          "description": "座位2 牌河该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 51,
+          "group": "discards",
+          "name": "discard_tsumogiri_s2",
+          "description": "座位2 牌河摸切标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 52,
+          "group": "discards",
+          "name": "discard_riichi_s2",
+          "description": "座位2 牌河立直宣言牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 53,
+          "group": "discards",
+          "name": "discard_red_s2",
+          "description": "座位2 牌河赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 54,
+          "group": "discards",
+          "name": "discard_early_s2",
+          "description": "座位2 前6巡内切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 55,
+          "group": "discards",
+          "name": "discard_late_s2",
+          "description": "座位2 第12巡及之后切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 56,
+          "group": "discards",
+          "name": "discard_n1_s3",
+          "description": "座位3 牌河该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 57,
+          "group": "discards",
+          "name": "discard_n2_s3",
+          "description": "座位3 牌河该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 58,
+          "group": "discards",
+          "name": "discard_n3_s3",
+          "description": "座位3 牌河该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 59,
+          "group": "discards",
+          "name": "discard_n4_s3",
+          "description": "座位3 牌河该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 60,
+          "group": "discards",
+          "name": "discard_tsumogiri_s3",
+          "description": "座位3 牌河摸切标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 61,
+          "group": "discards",
+          "name": "discard_riichi_s3",
+          "description": "座位3 牌河立直宣言牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 62,
+          "group": "discards",
+          "name": "discard_red_s3",
+          "description": "座位3 牌河赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 63,
+          "group": "discards",
+          "name": "discard_early_s3",
+          "description": "座位3 前6巡内切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 64,
+          "group": "discards",
+          "name": "discard_late_s3",
+          "description": "座位3 第12巡及之后切出的牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 65,
+          "group": "melds",
+          "name": "meld_n1_s0",
+          "description": "座位0 副露该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 66,
+          "group": "melds",
+          "name": "meld_n2_s0",
+          "description": "座位0 副露该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 67,
+          "group": "melds",
+          "name": "meld_n3_s0",
+          "description": "座位0 副露该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 68,
+          "group": "melds",
+          "name": "meld_n4_s0",
+          "description": "座位0 副露该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 69,
+          "group": "melds",
+          "name": "meld_red_s0",
+          "description": "座位0 副露赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 70,
+          "group": "melds",
+          "name": "meld_type_s0",
+          "description": "座位0 副露类型（吃1/3、碰2/3、杠1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 71,
+          "group": "melds",
+          "name": "meld_n1_s1",
+          "description": "座位1 副露该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 72,
+          "group": "melds",
+          "name": "meld_n2_s1",
+          "description": "座位1 副露该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 73,
+          "group": "melds",
+          "name": "meld_n3_s1",
+          "description": "座位1 副露该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 74,
+          "group": "melds",
+          "name": "meld_n4_s1",
+          "description": "座位1 副露该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 75,
+          "group": "melds",
+          "name": "meld_red_s1",
+          "description": "座位1 副露赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 76,
+          "group": "melds",
+          "name": "meld_type_s1",
+          "description": "座位1 副露类型（吃1/3、碰2/3、杠1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 77,
+          "group": "melds",
+          "name": "meld_n1_s2",
+          "description": "座位2 副露该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 78,
+          "group": "melds",
+          "name": "meld_n2_s2",
+          "description": "座位2 副露该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 79,
+          "group": "melds",
+          "name": "meld_n3_s2",
+          "description": "座位2 副露该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 80,
+          "group": "melds",
+          "name": "meld_n4_s2",
+          "description": "座位2 副露该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 81,
+          "group": "melds",
+          "name": "meld_red_s2",
+          "description": "座位2 副露赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 82,
+          "group": "melds",
+          "name": "meld_type_s2",
+          "description": "座位2 副露类型（吃1/3、碰2/3、杠1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 83,
+          "group": "melds",
+          "name": "meld_n1_s3",
+          "description": "座位3 副露该牌种张数 >= 1（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 84,
+          "group": "melds",
+          "name": "meld_n2_s3",
+          "description": "座位3 副露该牌种张数 >= 2（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 85,
+          "group": "melds",
+          "name": "meld_n3_s3",
+          "description": "座位3 副露该牌种张数 >= 3（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 86,
+          "group": "melds",
+          "name": "meld_n4_s3",
+          "description": "座位3 副露该牌种张数 >= 4（0/1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 87,
+          "group": "melds",
+          "name": "meld_red_s3",
+          "description": "座位3 副露赤5标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 88,
+          "group": "melds",
+          "name": "meld_type_s3",
+          "description": "座位3 副露类型（吃1/3、碰2/3、杠1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 89,
+          "group": "state",
+          "name": "n_kan",
+          "description": "场上总杠数归一化",
+          "quant_max": 1.0
+        },
+        {
+          "index": 90,
+          "group": "state",
+          "name": "riichi_declared_s0",
+          "description": "座位0 是否已立直",
+          "quant_max": 1.0
+        },
+        {
+          "index": 91,
+          "group": "state",
+          "name": "riichi_declared_s1",
+          "description": "座位1 是否已立直",
+          "quant_max": 1.0
+        },
+        {
+          "index": 92,
+          "group": "state",
+          "name": "riichi_declared_s2",
+          "description": "座位2 是否已立直",
+          "quant_max": 1.0
+        },
+        {
+          "index": 93,
+          "group": "state",
+          "name": "riichi_declared_s3",
+          "description": "座位3 是否已立直",
+          "quant_max": 1.0
+        },
+        {
+          "index": 94,
+          "group": "state",
+          "name": "score_bucket_s0",
+          "description": "座位0 点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 95,
+          "group": "state",
+          "name": "score_bucket_s1",
+          "description": "座位1 点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 96,
+          "group": "state",
+          "name": "score_bucket_s2",
+          "description": "座位2 点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 97,
+          "group": "state",
+          "name": "score_bucket_s3",
+          "description": "座位3 点数 10k 分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 98,
+          "group": "state",
+          "name": "score_raw_own",
+          "description": "自身点数原始值/40000",
+          "quant_max": 1.0
+        },
+        {
+          "index": 99,
+          "group": "state",
+          "name": "point_diff_0",
+          "description": "与下家/对家/上家的点差归一化（+40000 平移至 0..1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 100,
+          "group": "state",
+          "name": "point_diff_1",
+          "description": "与下家/对家/上家的点差归一化（+40000 平移至 0..1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 101,
+          "group": "state",
+          "name": "point_diff_2",
+          "description": "与下家/对家/上家的点差归一化（+40000 平移至 0..1）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 102,
+          "group": "state",
+          "name": "last_event_type",
+          "description": "上一事件类型列编码（摸/切/吃/碰/杠/立直/和）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 103,
+          "group": "state",
+          "name": "last_event_seat_s0",
+          "description": "上一事件来自座位0",
+          "quant_max": 1.0
+        },
+        {
+          "index": 104,
+          "group": "state",
+          "name": "last_event_seat_s1",
+          "description": "上一事件来自座位1",
+          "quant_max": 1.0
+        },
+        {
+          "index": 105,
+          "group": "state",
+          "name": "last_event_seat_s2",
+          "description": "上一事件来自座位2",
+          "quant_max": 1.0
+        },
+        {
+          "index": 106,
+          "group": "state",
+          "name": "last_event_seat_s3",
+          "description": "上一事件来自座位3",
+          "quant_max": 1.0
+        },
+        {
+          "index": 107,
+          "group": "state",
+          "name": "last_event_tile",
+          "description": "上一事件涉及牌标记",
+          "quant_max": 1.0
+        },
+        {
+          "index": 108,
+          "group": "state",
+          "name": "dora_count",
+          "description": "可见宝牌指示牌总数/5",
+          "quant_max": 1.0
+        },
+        {
+          "index": 109,
+          "group": "state",
+          "name": "wall_bucket",
+          "description": "牌山剩余 10 张分桶 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 110,
+          "group": "state",
+          "name": "riichi_sticks_onehot",
+          "description": "立直棒数 one-hot（列=棒数）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 111,
+          "group": "state",
+          "name": "round_onehot",
+          "description": "局数 one-hot（列 0..7 = E1..E4,S1..S4）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 112,
+          "group": "state",
+          "name": "honba_onehot",
+          "description": "本场数 one-hot",
+          "quant_max": 1.0
+        },
+        {
+          "index": 113,
+          "group": "state",
+          "name": "seat_onehot_s0",
+          "description": "自身座位是否为 0",
+          "quant_max": 1.0
+        },
+        {
+          "index": 114,
+          "group": "state",
+          "name": "seat_onehot_s1",
+          "description": "自身座位是否为 1",
+          "quant_max": 1.0
+        },
+        {
+          "index": 115,
+          "group": "state",
+          "name": "seat_onehot_s2",
+          "description": "自身座位是否为 2",
+          "quant_max": 1.0
+        },
+        {
+          "index": 116,
+          "group": "state",
+          "name": "seat_onehot_s3",
+          "description": "自身座位是否为 3",
+          "quant_max": 1.0
+        },
+        {
+          "index": 117,
+          "group": "state",
+          "name": "oya_onehot_s0",
+          "description": "亲家是否为座位 0",
+          "quant_max": 1.0
+        },
+        {
+          "index": 118,
+          "group": "state",
+          "name": "oya_onehot_s1",
+          "description": "亲家是否为座位 1",
+          "quant_max": 1.0
+        },
+        {
+          "index": 119,
+          "group": "state",
+          "name": "oya_onehot_s2",
+          "description": "亲家是否为座位 2",
+          "quant_max": 1.0
+        },
+        {
+          "index": 120,
+          "group": "state",
+          "name": "oya_onehot_s3",
+          "description": "亲家是否为座位 3",
+          "quant_max": 1.0
+        },
+        {
+          "index": 121,
+          "group": "state",
+          "name": "visible_red5",
+          "description": "可见赤5总数/3（手牌+副露+牌河）",
+          "quant_max": 1.0
+        },
+        {
+          "index": 122,
+          "group": "state",
+          "name": "discards_total_s0",
+          "description": "座位0 已切牌数/24",
+          "quant_max": 1.0
+        },
+        {
+          "index": 123,
+          "group": "state",
+          "name": "discards_total_s1",
+          "description": "座位1 已切牌数/24",
+          "quant_max": 1.0
+        },
+        {
+          "index": 124,
+          "group": "state",
+          "name": "discards_total_s2",
+          "description": "座位2 已切牌数/24",
+          "quant_max": 1.0
+        },
+        {
+          "index": 125,
+          "group": "state",
+          "name": "discards_total_s3",
+          "description": "座位3 已切牌数/24",
+          "quant_max": 1.0
+        }
+      ]
+    }
+  }
+}
