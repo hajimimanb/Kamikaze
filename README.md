@@ -71,16 +71,16 @@ python tools/rl_panel_server.py   # render 循环 + http.server 8090
 # 浏览器打开 http://127.0.0.1:8090/rl_train_panel.html
 ```
 
-### 方式 E：使用训练好的 AI 模型
+### 方式 E：使用 RL 模型（Kamikaze 自对弈提升版）
 
-加载 checkpoint 让模型决策（与引擎对局 / 接入外部环境）：
+加载强化学习模型决策（与引擎对局 / 接入外部环境）。**模型已随仓库分发**（fp16 版，`models/kamikaze_rl_v1_fp16.pt`，~58MB）：
 
 ```python
 from agent.policy import RiichiPolicy
 from env.riichi_game import RiichiGame, RiichiConfig
 
-# 1) 加载模型（需要先训练或放置 ckpt；支持 --event-attn 旁支）
-policy = RiichiPolicy("checkpoints/sl/rl/rl_v1.pt", seed=0, use_event_attn=True)
+# 1) 加载 RL 模型（fp16 分发版，自动转 fp32；启用事件注意力旁支）
+policy = RiichiPolicy("models/kamikaze_rl_v1_fp16.pt", seed=0, use_event_attn=True)
 
 # 2) 单步决策：
 obs = game.state.get_observation()
@@ -92,11 +92,30 @@ game = RiichiGame(RiichiConfig(), seed=42)
 while game.phase != "game_end":
     game.step(policy(game) if game.turn == 0 else game.random_action())
 
-# 4) 接入引擎事件注意力：policy(game) 会自动传入真实时间线事件
+# 4) 事件注意力自动接入：policy(game) 传入真实时间线事件
 ```
 
-**说明**：checkpoint 文件较大（~122MB），未随仓库分发——需按"方式 B"训练产出，
-或自行放置到 `checkpoints/sl/rl/rl_v1.pt`。
+### 方式 F：使用 SL 模型（监督学习基线）
+
+SL 模型是仅用**监督学习**训练于天凤牌谱的基线（无 RL 自对弈提升），是 RL 版的起点：
+
+```python
+# 加载 SL 基线模型（无事件注意力旁支）
+sl_policy = RiichiPolicy("checkpoints/sl/transfer/transfer_final.pt", seed=0, use_event_attn=False)
+
+# 使用方式与 RL 版相同：
+#   action = sl_policy.act(obs)                     # 单步
+#   game.step(sl_policy(game) if game.turn == 0 else game.random_action())  # 整局
+```
+
+**SL 与 RL 版区别**：
+- **SL 版**（transfer_final）：从 Tenhou 职业/高段位牌谱逐决策监督学习（切牌/立直/吃/碰/杠分别建模），
+  学习人类动作分布——是"模仿人类"的基线，稳定但无自我提升。
+- **RL 版**（Kamikaze）：在 SL 版基础上用 **PPO 自对弈强化学习**提升（Φ 全局奖励 + 对称和牌/放铳奖励），
+  并学习出自身的打法风格（当前为副露流）。RL 版为当前主推模型；SL 版可作基线对照（评估用 `--b transfer_final.pt`）。
+
+**说明**：SL 模型（transfer_final.pt）文件较大未随仓库分发，需按"方式 B"的 SL 阶段训练产出，
+或自行放置到 `checkpoints/sl/transfer/transfer_final.pt`；RL fp16 版已随仓库分发。
 
 ## 模型架构
 
@@ -156,8 +175,8 @@ r = Φ差分(局面→最终pt)
 
 | 指标 | 数值 |
 |---|---|
-| **有副露动作的局** | **100%**（4,293 局全部，含他家和/流局）——副露流打法 |
 | **和牌分布**（模型家和牌方式）| 副露和 **75.0%** / 立直和（门清）23.5% / 默听和 1.5% |
+| **副露** | 平均 1.48 次/轮（副露流打法）|
 | **和铳率** | 和牌率 19.3% / 放铳率 14.5%（每轮）|
 | **平均和点 / 平均铳点** | **5,164 点 / 4,587 点** |
 | **vs-SL 平均顺位** | **2.50**（n=728 局，均势 2.5）|
@@ -172,6 +191,24 @@ tools/ → eval_vs_sl, eval_sliding, train_reward_pred, rl_train_dashboard, star
 docs/  → 架构/方案/规则差异/数据许可文档
 tests/ → 引擎 oracle 回归测试（244 项）
 ```
+
+## 数据集
+
+**来源**：天凤（Tenhou）公开对局日志（2026-01 日期段，60 个日期文件）。
+
+**规模与用途**：
+| 数据集 | 规模 | 用途 |
+|---|---|---|
+| transfer_records（处理后的逐决策记录）| **27,579 局** | Φ 奖励预测器训练（tools/train_reward_pred.py）|
+| Tenhou 原始日志 | 同源 | 数据校验/规则 oracle 验证/评估参照 |
+
+**记录格式**（data/processed/transfer_records/records-*.jsonl.gz，JSON 行 + gzip）：
+每行 = 一个玩家的一个决策时刻的完整可观察状态：`seat / round / honba / scores / oya / riichi_sticks / wall_left / dora_indicators / hand / melds / discards / legal_actions / label`（label 为人类实际采取的动作）。
+
+**处理管线**：src/tenhou/（下载 → 解析 mjlog → 校验 → 提取逐决策记录）；
+数据不随仓库分发（体积大），需自行按 docs/data_license_check.md 获取天凤日志后重跑管线。
+
+**许可**：天凤日志为公开数据；使用条款详见 docs/data_license_check.md。
 
 ## 数据与许可
 - 训练数据：天凤（Tenhou）公开对局日志（详见 docs/data_license_check.md）
