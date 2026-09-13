@@ -1,7 +1,9 @@
 # Kamikaze — Riichi Mahjong AI（神风 · 日麻 AI）
 
-副露流麻将 AI + 可独立部署的日麻规则引擎。
-模型 trained on Tenhou logs with supervised learning (SL) and reinforcement learning (RL)。
+独立实现的立直麻将 AI + 可独立部署的日麻规则引擎，基于天凤（Tenhou）对局日志，以 SL（监督学习）初始化和 PPO 自对弈强化学习构建完整系统。
+
+> **Status：`Engineering Validation: Complete` · `Scientific Evaluation: Deferred`**
+> 大型 RL 训练与 vs-SL 统计评估因计算预算与项目时间分配暂缓；**本仓库不主张 RL 优于 SL 的结论**。详见 [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)。
 
 ## 这是什么
 
@@ -190,26 +192,11 @@ r = Φ差分(局面→最终pt)
 ### 热干预（免重启）
 编辑 `logs/rl_hyper.json`（每 ~10s 应用）：奖励 6 参数 / 学习率 / bias / snap_exclude / head_z_cap / always_win / reset_heads / pause / quit / 评估口径。
 
-## 训练进度与表现（截至 2026-08-28）
-> ⚠️ **因资源和时间限制，当前仅训练至计划一半**（单 GPU）。
+## 历史开发进展
 
-| 项目 | 数值 |
-|---|---|
-| 计划 / 已完成 | 10,000 局 / 500 epoch；**4,293 局 / 214 epoch（约 43%）** |
-| 稳定性 | ratio≈1.000、KL 0.001–0.14、clip <5%（无失控）|
+早期开发运行（单 GPU，约 43% 计划局数）曾记录一组**初步**表现数据（如 vs-SL 平均顺位 ≈ 2.50）。作为开发过程的中间快照，完整数据保留在 [`docs/history.md`](./docs/history.md)，**未**在最终 multi-seed 协议下复现，**不构成**科研结论。
 
-**模型表现**（4293 局 / 49,544 轮统计）：
-
-| 指标 | 数值 |
-|---|---|
-| **和牌分布**（模型家和牌方式）| 副露和 **75.0%** / 立直和（门清）23.5% / 默听和 1.5% |
-| **副露** | 平均 1.48 次/轮（副露流打法）|
-| **和铳率** | 和牌率 19.3% / 放铳率 14.5%（每轮）|
-| **平均和点 / 平均铳点** | **5,164 点 / 4,587 点** |
-| **vs-SL 平均顺位** | **2.50**（n=728 局，均势 2.5）|
-| vs-历史版本平均顺位 | 2.62（n=1,030 局）|
-
-**vs-SL 滑动评估**（独立评估进程，100 局口径）：pt 加权胜率 0.27–0.79、每百局 pt **−1533~+2433**、rank 0.25–0.53——互有胜负、未稳定收敛。
+> 正式 Scientific Evaluation 未执行——见 [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)。
 
 ## 目录结构
 ```

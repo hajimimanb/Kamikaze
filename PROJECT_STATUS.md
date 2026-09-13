@@ -22,9 +22,10 @@
 
 ## Reason
 
-The project is frozen at the engineering-validation milestone; large-scale RL
-experiments are deferred due to the available compute budget and overall project
-time allocation. No attempt is made to claim these were completed.
+Large-scale RL retraining and scientific evaluation were deferred because the
+available compute budget and project time allocation are prioritized toward the
+primary undergraduate research track. No attempt is made to claim these were
+completed.
 
 ## Scientific Claim
 
