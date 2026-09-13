@@ -23,6 +23,8 @@ pytest==9.1.1
 requests==2.34.2
 setuptools==84.0.0
 sympy==1.14.0
+# legacy: torch was pinned to a local wheel on the original Windows/CUDA box.
+# Re-resolve for the target GPU platform (torch site index) before GPU runs.
 torch @ file:///C:/agentwork/data/tmp/torch-2.13.0%2Bcu130-cp312-cp312-win_amd64.whl#sha256=2efab1e83604ca628c6d85b9e188c153690980498d1297081a9dad704919303c
 typing_extensions==4.16.0
 urllib3==2.7.0

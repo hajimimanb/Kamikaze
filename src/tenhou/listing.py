@@ -19,7 +19,11 @@ import os
 import re
 import sys
 import urllib.request
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import raw_dir, processed_dir
 
 ROW_RE = re.compile(
     r"(\d{1,2}:\d{2})?[^<]*?<a href=\"[^\"]*[?&]log=([0-9A-Za-z_-]+)\""
@@ -106,7 +110,7 @@ def _fetch_zip(year: str, cache_dir: Optional[str]) -> Optional[bytes]:
     runs a 30-minute probe and will announce when they return. When they do,
     this fallback lets the batch resume 2009-2025 without code changes.
     """
-    zip_dir = "C:/agentwork/data/raw/scraw"
+    zip_dir = str(raw_dir() / "scraw")
     zip_path = os.path.join(zip_dir, "scraw%s.zip" % year)
     if os.path.exists(zip_path) and os.path.getsize(zip_path) > 0:
         try:
@@ -245,8 +249,8 @@ def ids_file_for_day(date: str, cache_dir: str, out_dir: str) -> str:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--date", required=True, help="YYYYMMDD")
-    ap.add_argument("--cache-dir", default="C:/agentwork/data/raw/listings")
-    ap.add_argument("--out-dir", default="C:/agentwork/data/processed/tenhou")
+    ap.add_argument("--cache-dir", default=str(raw_dir() / "listings"))
+    ap.add_argument("--out-dir", default=str(processed_dir() / "tenhou"))
     ap.add_argument("--print", action="store_true", dest="print_rows")
     args = ap.parse_args(argv)
 

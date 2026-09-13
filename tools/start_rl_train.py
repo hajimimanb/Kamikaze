@@ -5,8 +5,12 @@
 日志：logs/rl_train.txt（追加）；PID：logs/rl_train.pid
 """
 import os, subprocess, sys
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import repo_root
 
-CWD = "C:/agentwork"
+CWD = str(repo_root())
 ARGS = [
     "-u", "src/model/train_rl_vec.py",
     "--vec", "8", "--games", "20", "--epochs", "500",   # 20局/epoch × 500 = 10000 局（牌运平滑）

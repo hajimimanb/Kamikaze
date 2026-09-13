@@ -2,9 +2,11 @@
 // Usage: node fetch_record.js <uuid> [gateway_host]
 const protobuf = require("protobufjs");
 const fs = require("fs");
+const path = require("path");
+const REPO = path.join(__dirname, "..", "..", "..");
 
-const LIQI_PATH = "C:/agentwork/data/tmp/liqi.json";
-const VERSION_JSON = JSON.parse(fs.readFileSync("C:/agentwork/data/tmp/mjs_version.json", "utf8")
+const LIQI_PATH = path.join(REPO, "data", "tmp", "liqi.json");
+const VERSION_JSON = JSON.parse(fs.readFileSync(path.join(REPO, "data", "tmp", "mjs_version.json"), "utf8")
   .replace(/^\uFEFF/, ""));
 const GATEWAYS = [
   "route-2.maj-soul.com",

@@ -11,7 +11,9 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-OUT = "C:/agentwork/data/processed/tenhou"
+from utils.paths import processed_dir
+
+OUT = str(processed_dir() / "tenhou")
 DONE = os.path.join(OUT, "done")
 
 

@@ -39,11 +39,15 @@ import random
 import sys
 import time
 import zlib
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import tmp_dir
 
 CAP_ENDPOINT = "https://akcap.pikapika.me/14f343ec68"
-TOKEN_CACHE = "C:/agentwork/data/tmp/cap_token.json"
-TOKEN_CACHE_LEGACY = "C:/agentwork/data/tmp/majsoul_cap_token.json"
-ATTEMPT_LOG = "C:/agentwork/data/tmp/cap_attempts.jsonl"
+TOKEN_CACHE = str(tmp_dir() / "cap_token.json")
+TOKEN_CACHE_LEGACY = str(tmp_dir() / "majsoul_cap_token.json")
+ATTEMPT_LOG = str(tmp_dir() / "cap_attempts.jsonl")
 
 UA_LIST = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "

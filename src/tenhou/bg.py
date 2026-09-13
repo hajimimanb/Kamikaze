@@ -25,7 +25,7 @@ if __name__ == "__main__":
     flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
     import os as _os
     env = dict(_os.environ)
-    env["PYTHONPATH"] = "C:/agentwork/src"
+    env["PYTHONPATH"] = str(src_dir())
     env["PYTHONIOENCODING"] = "utf-8"
     p = subprocess.Popen(args, stdout=f, stderr=f, stdin=subprocess.DEVNULL,
                          creationflags=flags, close_fds=True, env=env)

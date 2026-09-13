@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """Exact train-partition record counter -> real expected shard count (truthful)."""
-import collections, glob, gzip, json, os, time
+import collections, glob, gzip, json, os, sys, time
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import processed_dir, logs_dir
 
-BASE = "C:/agentwork/data/processed/tenhou"
-OUT = "C:/agentwork/logs/train/train_expected.json"
+BASE = str(processed_dir() / "tenhou")
+OUT = str(logs_dir() / "train" / "train_expected.json")
 
 def main():
     t0 = time.time()

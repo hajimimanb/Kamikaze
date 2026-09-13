@@ -28,8 +28,11 @@ import zlib
 from functools import lru_cache
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import raw_dir, processed_dir
 
-PAIFU_DIR = "C:/agentwork/data/raw/majsoul/paifu"
+PAIFU_DIR = str(raw_dir() / "majsoul/paifu")
 PAIFU_PAGE = "https://game.maj-soul.com/1/?paipu="
 FETCH_RECORD = "https://game.maj-soul.com/1/fetchGameRecord"
 MIRRORS = [
@@ -775,8 +778,8 @@ def parse_file(path, game_id=None):
 # Batch driver
 # --------------------------------------------------------------------------
 
-def run_batch(uuid_file, out_file="C:/agentwork/data/processed/majsoul/records.jsonl",
-              stats_file="C:/agentwork/data/processed/majsoul/parse_stats.json",
+def run_batch(uuid_file, out_file=str(processed_dir() / "majsoul/records.jsonl"),
+              stats_file=str(processed_dir() / "majsoul/parse_stats.json"),
               token=None, limit=None, delay=0.35, skip_existing=True,
               max_retries=3):
     """Download + parse all uuids; append records to out_file."""
@@ -841,8 +844,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["fetch", "batch"])
     ap.add_argument("uuid", nargs="?")
-    ap.add_argument("--uuid-file", default="C:/agentwork/data/raw/majsoul/uuid_list.txt")
-    ap.add_argument("--out", default="C:/agentwork/data/processed/majsoul/records.jsonl")
+    ap.add_argument("--uuid-file", default=str(raw_dir() / "majsoul/uuid_list.txt"))
+    ap.add_argument("--out", default=str(processed_dir() / "majsoul/records.jsonl"))
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--delay", type=float, default=0.35)
     args = ap.parse_args()

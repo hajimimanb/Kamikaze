@@ -3,9 +3,13 @@ import gzip
 import glob
 import json
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import processed_dir
 
 from tenhou.stats import assign_split
 from tenhou.verify_splits import load_lists
@@ -24,7 +28,7 @@ def test_manifests_disjoint_and_self_consistent():
 
 
 def test_every_record_game_id_in_its_partition():
-    shards = glob.glob("C:/agentwork/data/processed/tenhou/records-*.jsonl.gz")
+    shards = glob.glob(str(processed_dir() / "tenhou" / "records-*.jsonl.gz"))
     if not shards:
         import pytest
         pytest.skip("no record shards on disk yet")

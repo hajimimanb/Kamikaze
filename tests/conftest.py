@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Shared pytest fixtures/helpers for the riichi engine tests.
 
-Adds C:/agentwork/src to sys.path so tests can import riichi / env packages.
+Adds <repo>/src to sys.path so tests can import riichi / env packages.
 """
 import os
 import random

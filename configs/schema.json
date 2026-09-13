@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "kamikaze-rl-v1-config.schema.json",
+  "title": "Kamikaze RL v1 experiment config schema",
+  "description": "Schema for configs (rl_v1 / rl_v1_event_attn / rl_v1_reward_full). Seven top-level blocks: environment, model, training, reward, opponent_pool, evaluation, runtime. Validation may be performed by configs/config_validate.py (pure-Python, no third-party deps).",
+  "type": "object",
+  "required": [
+    "environment",
+    "model",
+    "training",
+    "reward",
+    "opponent_pool",
+    "evaluation",
+    "runtime"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "environment": {
+      "type": "object",
+      "required": ["start_score", "return_score"],
+      "additionalProperties": true,
+      "properties": {
+        "aka": {"type": "boolean"},
+        "kuitan": {"type": "boolean"},
+        "kuikae": {"type": "boolean"},
+        "kiriage_mangan": {"type": "boolean"},
+        "atamahane": {"type": "boolean"},
+        "double_ron": {"type": "boolean"},
+        "nagashi_mangan": {"type": "boolean"},
+        "kyushu_kyuhai": {"type": "boolean"},
+        "four_winds_ryuukyoku": {"type": "boolean"},
+        "four_kans_ryuukyoku": {"type": "boolean"},
+        "chankan_kokushi": {"type": "boolean"},
+        "agari_yame": {"type": "boolean"},
+        "west_extension": {"type": "boolean"},
+        "double_yakuman": {"type": "boolean"},
+        "start_score": {"type": "integer", "minimum": 0},
+        "return_score": {"type": "integer", "minimum": 0}
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["channels", "n_blocks", "binary_heads", "use_event_attn"],
+      "additionalProperties": true,
+      "properties": {
+        "feature_mode": {"enum": ["simple", "full"]},
+        "channels": {"type": "integer", "minimum": 1},
+        "n_blocks": {"type": "integer", "minimum": 0},
+        "binary_heads": {
+          "type": "array",
+          "items": {"enum": ["riichi", "chow", "pon", "kan", "ron", "tsumo", "kyushu"]}
+        },
+        "include_value": {"type": "boolean"},
+        "use_event_attn": {"type": "boolean"},
+        "inj_scale": {"type": "number"},
+        "ctx_gate_init": {"type": "number"}
+      }
+    },
+    "training": {
+      "type": "object",
+      "required": ["games_per_epoch", "epochs", "optimizer", "lr", "seed"],
+      "additionalProperties": true,
+      "properties": {
+        "games_per_epoch": {"type": "integer", "minimum": 1},
+        "epochs": {"type": "integer", "minimum": 1},
+        "optimizer": {"enum": ["adamw", "adam", "sgd"]},
+        "lr": {"type": "number", "exclusiveMinimum": 0},
+        "lr_trunk_ratio": {"type": "number", "exclusiveMinimum": 0},
+        "clip": {"type": "number", "exclusiveMinimum": 0},
+        "clip_grad": {"type": "number", "exclusiveMinimum": 0},
+        "gamma": {"type": "number", "minimum": 0, "maximum": 1},
+        "lam": {"type": "number", "minimum": 0, "maximum": 1},
+        "entropy_coef": {"type": "number", "minimum": 0},
+        "vf_coef": {"type": "number", "minimum": 0},
+        "temperature": {"type": "number", "exclusiveMinimum": 0},
+        "seed": {"type": "integer", "minimum": 0},
+        "eval_every": {"type": "integer", "minimum": 1},
+        "eval_games": {"type": "integer", "minimum": 1},
+        "save_every": {"type": "integer", "minimum": 1},
+        "pool_k": {"type": "integer", "minimum": 1},
+        "phi_monitor_every": {"type": "integer", "minimum": 0},
+        "t5_every": {"type": "integer", "minimum": 0},
+        "t5_games": {"type": "integer", "minimum": 1}
+      }
+    },
+    "reward": {
+      "type": "object",
+      "required": ["dense", "terminal", "settlement_rule"],
+      "additionalProperties": true,
+      "properties": {
+        "dense": {"enum": ["phi_diff"]},
+        "terminal": {"enum": ["settlement_pt"]},
+        "settlement_rule": {"enum": ["tenhou", "majsoul", "mleague"]},
+        "agari_bonus": {"type": "boolean"},
+        "deal_in_penalty": {"type": "boolean"},
+        "phi": {
+          "type": "object",
+          "properties": {
+            "feat_dim": {"type": "integer", "minimum": 1},
+            "hidden": {"type": "integer", "minimum": 1},
+            "num_layers": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "opponent_pool": {
+      "type": "object",
+      "required": ["strategy", "p_self", "p_past", "p_sl", "k"],
+      "additionalProperties": true,
+      "properties": {
+        "strategy": {"enum": ["self_hist_sl", "self_only", "self_hist"]},
+        "p_self": {"type": "number", "minimum": 0, "maximum": 1},
+        "p_past": {"type": "number", "minimum": 0, "maximum": 1},
+        "p_sl": {"type": "number", "minimum": 0, "maximum": 1},
+        "k": {"type": "integer", "minimum": 1},
+        "past_cache_max": {"type": "integer", "minimum": 1}
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["primary_metric", "ci_method"],
+      "additionalProperties": true,
+      "properties": {
+        "primary_metric": {"enum": ["mean_rank"]},
+        "secondary_metrics": {
+          "type": "array",
+          "items": {"enum": ["rank1_rate", "placement_score", "pt_per_100"]}
+        },
+        "ci_method": {"enum": ["bootstrap"]},
+        "ci_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "n_bootstrap": {"type": "integer", "minimum": 100},
+        "seat_rotation": {"type": "boolean"},
+        "pilot": {
+          "type": "object",
+          "properties": {
+            "seeds": {"type": "integer", "minimum": 1},
+            "games_per_seed": {"type": "integer", "minimum": 1}
+          }
+        },
+        "full": {
+          "type": "object",
+          "properties": {
+            "seeds": {"type": "integer", "minimum": 1},
+            "games_per_seed": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    }
+  }
+}

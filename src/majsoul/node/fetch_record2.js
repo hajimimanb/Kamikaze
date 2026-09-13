@@ -1,8 +1,10 @@
 // fetch_record2.js - fastLogin (guest) then fetchGameRecord
 const protobuf = require("protobufjs");
 const fs = require("fs");
-const LIQI_PATH = "C:/agentwork/data/tmp/liqi.json";
-const VERSION_JSON = JSON.parse(fs.readFileSync("C:/agentwork/data/tmp/mjs_version.json", "utf8"));
+const path = require("path");
+const REPO = path.join(__dirname, "..", "..", "..");
+const LIQI_PATH = path.join(REPO, "data", "tmp", "liqi.json");
+const VERSION_JSON = JSON.parse(fs.readFileSync(path.join(REPO, "data", "tmp", "mjs_version.json"), "utf8"));
 const GATEWAYS = ["route-2.maj-soul.com", "route-4.maj-soul.com", "route-5.maj-soul.com", "route-6.maj-soul.com"];
 
 function encodeVarint(buf, value) {
@@ -103,7 +105,7 @@ async function main() {
       console.log("fetchGameRecord: head=", JSON.stringify(resJson.head || null).slice(0, 200));
       console.log("error=", JSON.stringify(resJson.error || null));
       if (res.data && res.data.length) {
-        fs.writeFileSync("C:/agentwork/data/tmp/record_data.bin", res.data);
+        fs.writeFileSync(path.join(REPO, "data", "tmp", "record_data.bin"), res.data);
         console.log("data bytes:", res.data.length, "-> saved record_data.bin");
         // decode
         const wrapper = decodeWrapper(res.data);
@@ -122,7 +124,7 @@ async function main() {
             } catch (e) {}
             return [dataJson && dataJson.seat !== undefined ? dataJson.seat : 0, { name: rec.name, data: dataJson }];
           });
-          fs.writeFileSync("C:/agentwork/data/tmp/fetched_record.json", JSON.stringify({ head: resJson.head, log }));
+          fs.writeFileSync(path.join(REPO, "data", "tmp", "fetched_record.json"), JSON.stringify({ head: resJson.head, log }));
           console.log("SAVED fetched_record.json");
         }
       } else if (res.data_url) {

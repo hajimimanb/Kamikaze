@@ -22,12 +22,13 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from utils.paths import raw_dir, processed_dir
 from tenhou.mjlog_parser import parse_game_file
 from tenhou.mjai_export import build_events
 from tenhou.extract import extract_game, GameStats
 
-RAW = "C:/agentwork/data/raw/mjlog"
-MJAI = "C:/agentwork/data/processed/tenhou/mjai"
+RAW = str(raw_dir() / "mjlog")
+MJAI = str(processed_dir() / "tenhou/mjai")
 
 BAKAZE_IDX = {"E": 0, "S": 1, "W": 2, "N": 3}
 

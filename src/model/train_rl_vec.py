@@ -18,6 +18,7 @@ import os
 import random
 import sys
 import time
+from pathlib import Path
 
 import json
 import numpy as np
@@ -25,7 +26,7 @@ import torch
 
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    sys.path.insert(0, "C:/agentwork")
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agent.policy import RiichiPolicy
 from env.riichi_game import RiichiGame, RiichiConfig

@@ -1,15 +1,19 @@
 import glob
 import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import tmp_dir
 
 from tenhou.mjlog_parser import parse_game_file, decode_meld
 
 
 def _load(name):
-    return parse_game_file(os.path.join("C:/agentwork/data/tmp", name))
+    return parse_game_file(os.path.join(str(tmp_dir()), name))
 
 
 def test_sample_2026_structure():
@@ -82,7 +86,7 @@ def test_draw_discard_letters_and_tsumogiri():
 
 
 def test_old_fixtures_parse():
-    files = sorted(glob.glob("C:/agentwork/data/tmp/old_fixtures/*.xml"))
+    files = sorted(glob.glob(str(tmp_dir() / "old_fixtures" / "*.xml")))
     assert len(files) >= 13
     ok = 0
     for f in files:
@@ -94,7 +98,7 @@ def test_old_fixtures_parse():
 
 def test_old_fixture_no_lobby():
     # bug1.xml: GO without lobby attr (pre-2012 era)
-    g = parse_game_file("C:/agentwork/data/tmp/old_fixtures/bug1.xml")
+    g = parse_game_file(str(tmp_dir() / "old_fixtures" / "bug1.xml"))
     assert g["lobby"] is None
     assert g["type"] == 169
 
@@ -113,8 +117,8 @@ def test_kan_dora_from_fixture():
            "kan4-case-2025012500gm-00a9-0000-c294f3d0.xml")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     data = urllib.request.urlopen(req, timeout=30).read()
-    open("C:/agentwork/data/tmp/kan4.xml", "wb").write(data)
-    g = parse_game_file("C:/agentwork/data/tmp/kan4.xml")
+    open(str(tmp_dir() / "kan4.xml"), "wb").write(data)
+    g = parse_game_file(str(tmp_dir() / "kan4.xml"))
     dora = [e for r in g["rounds"] for e in r["events"] if e[0] == "dora"]
     kans = [e for r in g["rounds"] for e in r["events"]
             if e[0] == "meld" and e[2] and e[2]["type"] in ("ankan", "minkan", "kakan")]
@@ -127,7 +131,7 @@ def test_edge_fixtures_all_parse_and_extract():
     # nagashi / 9-9 / yakuman / multiple yakuman)
     import glob as _glob
     from tenhou.extract import extract_game, GameStats
-    files = sorted(_glob.glob("C:/agentwork/data/tmp/edge_fixtures/*.xml"))
+    files = sorted(_glob.glob(str(tmp_dir() / "edge_fixtures" / "*.xml")))
     if not files:
         import pytest
         pytest.skip("edge fixtures not downloaded")
@@ -144,9 +148,9 @@ def test_edge_fixtures_all_parse_and_extract():
 
 def test_gzip_roundtrip():
     import gzip
-    raw = open("C:/agentwork/data/tmp/log0.html", "rb").read()
+    raw = open(str(tmp_dir() / "log0.html"), "rb").read()
     gz = gzip.compress(raw)
-    open("C:/agentwork/data/tmp/log0.test.xml.gz", "wb").write(gz)
-    g = parse_game_file("C:/agentwork/data/tmp/log0.test.xml.gz")
+    open(str(tmp_dir() / "log0.test.xml.gz"), "wb").write(gz)
+    g = parse_game_file(str(tmp_dir() / "log0.test.xml.gz"))
     assert len(g["rounds"]) == 11
-    os.remove("C:/agentwork/data/tmp/log0.test.xml.gz")
+    os.remove(str(tmp_dir() / "log0.test.xml.gz"))

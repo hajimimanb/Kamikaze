@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """Record sharding (BEFORE tensorization): split the 237 day record files
 into uniform record shards (65536 records each) with real progress lines."""
-import gzip, glob, os, time
+import gzip, glob, os, sys, time
+from pathlib import Path
 
-SRC = "C:/agentwork/data/processed/tenhou/records-*.jsonl.gz"
-OUT = "C:/agentwork/data/processed/tenhou/record_shards"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import processed_dir
+
+SRC = str(processed_dir() / "tenhou" / "records-*.jsonl.gz")
+OUT = str(processed_dir() / "tenhou" / "record_shards")
 SHARD_SIZE = 65536
 
 def flush(lines, idx):

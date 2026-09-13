@@ -22,15 +22,18 @@ import sys
 import numpy as np
 import torch
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
 
+from utils.paths import processed_dir, checkpoints_dir
 from agent.policy import RiichiPolicy
 
 HEADS = ("tsumo", "ron", "chow", "pon", "kan", "riichi", "kyushu")
-RECORDS = "C:/agentwork/data/processed/transfer_records/records-*.jsonl.gz"
-OUT_RL = "C:/agentwork/checkpoints/sl/rl/calibration.json"
-OUT_TF = "C:/agentwork/checkpoints/sl/transfer/calibration.json"
+RECORDS = str(processed_dir() / "transfer_records" / "records-*.jsonl.gz")
+OUT_RL = str(checkpoints_dir() / "sl" / "rl" / "calibration.json")
+OUT_TF = str(checkpoints_dir() / "sl" / "transfer" / "calibration.json")
 
 
 def collect(policy, files, max_samples):

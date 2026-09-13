@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 """并行模型评估 v2（CPU 推理，永远在跑，永远最新 epoch）。"""
 import json, os, sys, time
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork/tools")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO / "tools"))
 
 import torch
 from agent.policy import RiichiPolicy
 from env.riichi_game import RiichiGame, RiichiConfig
 from model.rl_reward import settlement_pt as _spt
+from utils.paths import checkpoints_dir, logs_dir
 
-CKPT = "C:/agentwork/checkpoints/sl/rl/rl_v1.pt"
-SL_CKPT = "C:/agentwork/checkpoints/sl/transfer/transfer_final.pt"
-OUT = "C:/agentwork/logs/vs_sl_sliding.jsonl"
-PROGRESS = "C:/agentwork/logs/vs_sl_eval_progress.json"
-GAMES_LOG = "C:/agentwork/logs/vs_sl_sliding_games.jsonl"
+CKPT = str(checkpoints_dir() / "sl" / "rl" / "rl_v1.pt")
+SL_CKPT = str(checkpoints_dir() / "sl" / "transfer" / "transfer_final.pt")
+OUT = str(logs_dir() / "vs_sl_sliding.jsonl")
+PROGRESS = str(logs_dir() / "vs_sl_eval_progress.json")
+GAMES_LOG = str(logs_dir() / "vs_sl_sliding_games.jsonl")
 GAMES = 100
 DEVICE = "cpu"
 

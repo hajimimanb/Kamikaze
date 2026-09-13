@@ -1,8 +1,10 @@
 // probe_handshake.js - exact client handshake then fetchGameRecord
 const protobuf = require("protobufjs");
 const fs = require("fs");
-const LIQI_PATH = "C:/agentwork/data/tmp/liqi.json";
-const VERSION_JSON = JSON.parse(fs.readFileSync("C:/agentwork/data/tmp/mjs_version.json", "utf8"));
+const path = require("path");
+const REPO = path.join(__dirname, "..", "..", "..");
+const LIQI_PATH = path.join(REPO, "data", "tmp", "liqi.json");
+const VERSION_JSON = JSON.parse(fs.readFileSync(path.join(REPO, "data", "tmp", "mjs_version.json"), "utf8"));
 
 function encodeVarint(buf, value) {
   let v = BigInt(value);

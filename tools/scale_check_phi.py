@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """B1 复查: Φ 差分奖励尺度 vs value（judge 复验判据）。ratio ∈ [0.2,5] 通过。"""
 import sys, json
-sys.path.insert(0, "C:/agentwork/src")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
 import numpy as np, torch
 from agent.policy import RiichiPolicy
 from env.riichi_game import RiichiGame, RiichiConfig

@@ -13,8 +13,12 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
-OUT = "C:/agentwork/data/processed/tenhou"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import processed_dir
+
+OUT = str(processed_dir() / "tenhou")
 
 
 def main(argv=None) -> int:
@@ -44,7 +48,7 @@ def main(argv=None) -> int:
             pass
     manifest = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "glob": "C:/agentwork/data/processed/tenhou/records-*.jsonl.gz",
+        "glob": str(processed_dir() / "tenhou" / "records-*.jsonl.gz"),
         "shards": entries,
         "splits": splits_meta,
     }

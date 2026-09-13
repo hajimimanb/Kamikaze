@@ -8,16 +8,20 @@ ryuukyoku / start_game which the classic one lacks or vice versa).
 import importlib.util
 import json
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import docs_dir, tmp_dir
 
 from tenhou.mjlog_parser import parse_game_file
 from tenhou.mjai_export import build_events
 
 spec = importlib.util.spec_from_file_location(
     "parse_classic",
-    "C:/agentwork/docs/mjai_ref_classic/mjlog2mjai-master/parse.py")
+    str(docs_dir() / "mjai_ref_classic" / "mjlog2mjai-master" / "parse.py"))
 classic = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(classic)
 
@@ -107,19 +111,19 @@ def _diff_events(mine, theirs):
 
 def test_sample_diff():
     _diff_events(build_events(parse_game_file(
-        "C:/agentwork/data/tmp/log0.html")),
-        _classic_events("C:/agentwork/data/tmp/log0.html"))
+        str(tmp_dir() / "log0.html"))),
+        _classic_events(str(tmp_dir() / "log0.html")))
 
 
 def test_edge_fixtures_diff():
     import glob
-    for f in sorted(glob.glob("C:/agentwork/data/tmp/edge_fixtures/*.xml"))[:3]:
+    for f in sorted(glob.glob(str(tmp_dir() / "edge_fixtures" / "*.xml")))[:3]:
         _diff_events(build_events(parse_game_file(f)),
                      _classic_events(f))
 
 
 def test_old_fixtures_diff():
     import glob
-    for f in sorted(glob.glob("C:/agentwork/data/tmp/old_fixtures/*.xml"))[:4]:
+    for f in sorted(glob.glob(str(tmp_dir() / "old_fixtures" / "*.xml")))[:4]:
         _diff_events(build_events(parse_game_file(f)),
                      _classic_events(f))

@@ -21,13 +21,16 @@ import urllib.error
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import raw_dir
 import api_client
 import cap_client
 
-GAME_LIST_FILE = "C:/agentwork/data/raw/majsoul/game_list.jsonl"
-RESOLVED_FILE = "C:/agentwork/data/raw/majsoul/resolved_games.jsonl"
-UUID_LIST_FILE = "C:/agentwork/data/raw/majsoul/uuid_list.txt"
-STATE_FILE = "C:/agentwork/data/raw/majsoul/resolve_state.json"
+GAME_LIST_FILE = str(raw_dir() / "majsoul/game_list.jsonl")
+RESOLVED_FILE = str(raw_dir() / "majsoul/resolved_games.jsonl")
+UUID_LIST_FILE = str(raw_dir() / "majsoul/uuid_list.txt")
+STATE_FILE = str(raw_dir() / "majsoul/resolve_state.json")
 
 
 def load_game_list(path=GAME_LIST_FILE):

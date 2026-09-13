@@ -6,11 +6,15 @@
 - 死亡且未 DONE → 重启 start_rl_train.py，写 logs/rl_watchdog.log
 """
 import os, subprocess, sys, time, datetime
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import repo_root, logs_dir
 
-CWD = "C:/agentwork"
-PID_FILE = "C:/agentwork/logs/rl_train.pid"
-TRAINLOG = "C:/agentwork/logs/rl_train.txt"
-WLOG = "C:/agentwork/logs/rl_watchdog.log"
+CWD = str(repo_root())
+PID_FILE = str(logs_dir() / "rl_train.pid")
+TRAINLOG = str(logs_dir() / "rl_train.txt")
+WLOG = str(logs_dir() / "rl_watchdog.log")
 
 
 def log(msg):
@@ -18,8 +22,7 @@ def log(msg):
     print(line, flush=True)
     try:
         with open(WLOG, "a", encoding="utf-8") as f:
-            f.write(line + "
-")
+            f.write(line + "\n")
     except Exception:
         pass
 

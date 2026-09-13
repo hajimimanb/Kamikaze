@@ -22,17 +22,18 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from utils.paths import raw_dir, processed_dir
 from tenhou.listing import phoenix_ids_for_day
 from tenhou.download import download_logs
 from tenhou.mjlog_parser import parse_game_file
 from tenhou.extract import extract_game, GameStats
 from tenhou.mjai_export import export_game
 
-MJAI_DIR = "C:/agentwork/data/processed/tenhou/mjai"
+MJAI_DIR = str(processed_dir() / "tenhou/mjai")
 
-RAW_DIR = "C:/agentwork/data/raw/mjlog"
-OUT_DIR = "C:/agentwork/data/processed/tenhou"
-LIST_CACHE = "C:/agentwork/data/raw/listings"
+RAW_DIR = str(raw_dir() / "mjlog")
+OUT_DIR = str(processed_dir() / "tenhou")
+LIST_CACHE = str(raw_dir() / "listings")
 
 
 def logline(log, msg: str) -> None:

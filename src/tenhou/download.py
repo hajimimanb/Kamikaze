@@ -21,10 +21,14 @@ import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Dict, List, Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import raw_dir
+
 XML_URL = "https://tenhou.net/0/log/?{logid}"
-DEFAULT_OUT = "C:/agentwork/data/raw/mjlog"
+DEFAULT_OUT = str(raw_dir() / "mjlog")
 
 
 def logid_year(logid: str) -> str:

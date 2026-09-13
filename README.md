@@ -13,6 +13,17 @@
 2. **日麻 AI 模型**：基于天凤牌谱训练（SL 迁移 → Φ 全局奖励预测 → PPO 自对弈强化学习），
    当前打法为**副露流**（激进吃碰杠），含完整训练/评估/监控工具链。
 
+## Project Status（项目状态）
+
+> **Frozen at the engineering-validation milestone.** 当前冻结于**工程验证里程碑**。
+
+- **Engineering Validation：Complete**（环境 / 数据管线 / SL / 奖励建模 / 自对弈 PPO / 评估与可复现基础设施 / D0 回归 均达成）
+- **Scientific Evaluation：Not completed**（RL 大规模训练、vs-SL 多 seed 统计评估、ablation、Human 行为分析 **未包含在本次发布中**）
+- 原因归因：`deferred due to the available compute budget`（计算预算），而非"环境无法训练"。
+
+> **No claim is made that the RL policy outperforms the SL baseline.**
+> README 中任何训练方式与历史表现仅作说明，不构成已证实的科研结论。
+
 ## 快速开始
 
 ### 方式 A：只使用规则引擎（mjai 协议）

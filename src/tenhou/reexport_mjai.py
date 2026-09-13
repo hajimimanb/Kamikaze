@@ -14,11 +14,12 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from utils.paths import raw_dir, processed_dir
 from tenhou.mjai_export import export_game_file
 
-RAW = "C:/agentwork/data/raw/mjlog"
-DONE_DIR = "C:/agentwork/data/processed/tenhou/done"
-MJAI = "C:/agentwork/data/processed/tenhou/mjai"
+RAW = str(raw_dir() / "mjlog")
+DONE_DIR = str(processed_dir() / "tenhou/done")
+MJAI = str(processed_dir() / "tenhou/mjai")
 
 
 def main(argv=None) -> int:

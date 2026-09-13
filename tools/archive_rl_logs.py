@@ -8,9 +8,13 @@
 - 保留 logs/past_ckpts.txt（历史对手池环形索引，重启后继续累计）
 - 面板（rl_train_dashboard）会在新日志出现后自动续读
 """
-import os, shutil, time
+import os, shutil, sys, time
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import logs_dir
 
-LOGS = "C:/agentwork/logs"
+LOGS = str(logs_dir())
 FILES = [
     "rl_train_metrics.jsonl",
     "rl_train_games.jsonl",

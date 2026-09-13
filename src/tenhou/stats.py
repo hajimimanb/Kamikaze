@@ -17,10 +17,14 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 from typing import Dict, List
 
-DEFAULT_GLOB = "C:/agentwork/data/processed/tenhou/records-*.jsonl*"
-DEFAULT_OUT = "C:/agentwork/docs/data_report.md"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import docs_dir, processed_dir
+
+DEFAULT_GLOB = str(processed_dir() / "tenhou" / "records-*.jsonl*")
+DEFAULT_OUT = str(docs_dir() / "data_report.md")
 
 
 def iter_records(patterns: List[str], pass_no=None):
@@ -257,7 +261,7 @@ def build_splits(games, records_per_game) -> Dict:
     rec_counts = collections.Counter()
     for g, s in split_of.items():
         rec_counts[s] += records_per_game[g]
-    out_dir = "C:/agentwork/data/processed/tenhou/splits"
+    out_dir = str(processed_dir() / "tenhou/splits")
     os.makedirs(out_dir, exist_ok=True)
     # E3 fix: atomic writes (tmp + os.replace) so concurrent readers
     # (ml-engineer preprocess, reviewer check_leakage) never see half-written

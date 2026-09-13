@@ -14,14 +14,18 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, "C:/agentwork/src")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+
+from utils.paths import processed_dir, checkpoints_dir, logs_dir
 from model.features import BINARY_HEADS, build_features, feature_channels
 from model.model import MultiHeadRiichiNet, get_device
 
-RECORDS = "C:/agentwork/data/processed/transfer_records/records-*.jsonl.gz"
-CKPT = "C:/agentwork/checkpoints/sl/transfer/transfer_final.pt"
-OUT = "C:/agentwork/checkpoints/sl/rl/value_pretrain.pt"
-LOG = "C:/agentwork/logs/value_train.txt"
+RECORDS = str(processed_dir() / "transfer_records" / "records-*.jsonl.gz")
+CKPT = str(checkpoints_dir() / "sl" / "transfer" / "transfer_final.pt")
+OUT = str(checkpoints_dir() / "sl" / "rl" / "value_pretrain.pt")
+LOG = str(logs_dir() / "value_train.txt")
 N_TARGET = 1_200_000
 BATCH = 1024
 LR = 3e-4

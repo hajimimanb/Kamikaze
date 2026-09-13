@@ -23,13 +23,17 @@ import time
 import numpy as np
 import torch
 
-sys.path.insert(0, "C:/agentwork/src")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+
+from utils.paths import processed_dir, logs_dir, checkpoints_dir
 from model.rl_reward import RewardPredictor, _round_features, settlement_pt
 
-RECORDS = "C:/agentwork/data/processed/transfer_records/records-*.jsonl.gz"
-MONITOR_JSON = "C:/agentwork/logs/rl_phi_monitor.json"
-PHI_OUT = "C:/agentwork/checkpoints/sl/rl/reward_predictor.pt"
-LOG = "C:/agentwork/logs/rl_phi_monitor.txt"
+RECORDS = str(processed_dir() / "transfer_records" / "records-*.jsonl.gz")
+MONITOR_JSON = str(logs_dir() / "rl_phi_monitor.json")
+PHI_OUT = str(checkpoints_dir() / "sl" / "rl" / "reward_predictor.pt")
+LOG = str(logs_dir() / "rl_phi_monitor.txt")
 
 DRIFT_RATIO = 1.3          # MSE 恶化 >30% 触发重训
 EVAL_EVERY = 500           # 每 500 局评估一次（可被 train_rl 参数覆盖）

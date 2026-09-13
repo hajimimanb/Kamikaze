@@ -15,12 +15,16 @@ import argparse, gzip, glob, json, os, sys, time
 import numpy as np
 import torch
 
-sys.path.insert(0, "C:/agentwork/src")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+
+from utils.paths import processed_dir, checkpoints_dir, logs_dir
 from model.rl_reward import RewardPredictor, _round_features, settlement_pt
 
-RECORDS = "C:/agentwork/data/processed/transfer_records/records-*.jsonl.gz"
-OUT = "C:/agentwork/checkpoints/sl/rl/reward_predictor.pt"
-LOG = "C:/agentwork/logs/reward_pred.txt"
+RECORDS = str(processed_dir() / "transfer_records" / "records-*.jsonl.gz")
+OUT = str(checkpoints_dir() / "sl" / "rl" / "reward_predictor.pt")
+LOG = str(logs_dir() / "reward_pred.txt")
 
 
 def collect_games(files, limit=0):

@@ -7,7 +7,9 @@
 用法: .venv/Scripts/python.exe tools/gate_probe.py [--ckpt ...]
 """
 import sys
-sys.path.insert(0, "C:/agentwork/src"); sys.path.insert(0, "C:/agentwork")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src")); sys.path.insert(0, str(_REPO))
 import argparse
 import numpy as np
 import torch

@@ -1,10 +1,12 @@
 // probe_rpcs.js - test public RPCs as guest
 const protobuf = require("protobufjs");
 const fs = require("fs");
+const path = require("path");
+const REPO = path.join(__dirname, "..", "..", "..");
 const { execSync } = require("child_process");
 
-const LIQI_PATH = "C:/agentwork/data/tmp/liqi.json";
-const VERSION_JSON = JSON.parse(fs.readFileSync("C:/agentwork/data/tmp/mjs_version.json", "utf8"));
+const LIQI_PATH = path.join(REPO, "data", "tmp", "liqi.json");
+const VERSION_JSON = JSON.parse(fs.readFileSync(path.join(REPO, "data", "tmp", "mjs_version.json"), "utf8"));
 const GATEWAYS = ["route-2.maj-soul.com", "route-4.maj-soul.com", "route-5.maj-soul.com", "route-6.maj-soul.com"];
 
 function encodeVarint(buf, value) {

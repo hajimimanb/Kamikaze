@@ -135,3 +135,114 @@ C:/agentwork/eval/ 下: scenario_gen.py（生成/抽样场况）、expert_report
   (后者口径为完整同局面含牌河/场况, 约束更多但选择空间更小);
   官方校准基线维持保守的 65-70% (>70% 告警), 实测区间作为补充证据,
   由 offline_metrics 输出 human_human_baseline.measured_proxy 字段携带。
+
+---
+
+## 9. 统一独立评估协议（协议 2.2 · RL 阶段 vs-SL 对比）
+
+> 本章与 §1–§8 的「专家打分 / 可解释性」终极测评（阶段5）互补：§9 定义 RL 模型与基线之间
+> 的**可复现、多 seed、带置信区间**的独立强度对比，是 README 主结果表与 D4 评估脚本的契约。
+> 口径依据 feedback1（2026-09-13）§4/§5/§6/§12–§17 修正。
+
+### 9.1 基线与定位
+
+| 层级 | 基线 | 用途（feedback1 §7） |
+|---|---|---|
+| Sanity | Random | 环境/评估 sanity check，非正式竞争基准 |
+| Sanity | Rule-based（向听贪心等规则 bot） | 环境/评估 sanity baseline |
+| Learning | SL（`transfer_final.pt`） | **核心 baseline** |
+| Learning | SL + PPO（RL v1） | **核心目标** |
+
+正式结论只取 Learning 层对比；Random/Rule 仅用于逐级验证（先跑通 Random → Rule → SL → RL）。
+
+### 9.2 主指标与辅助指标
+
+- **主指标：Mean Rank（平均顺位）**。麻将是四人排序博弈，只用第一名率会丢失信息。
+- 辅助指标：Rank 1 Rate（胜率）、Placement Score、pt/100 局、和牌率、放铳率。
+- **术语口径（feedback1 §6）**：
+  - `Win Rate` = **Rank 1 Rate** = P(rank=1)；
+  - `Placement Score` = P(rank=1) + 0.5·P(rank=2)（**不再叫 Win Rate**，rank2 不是 win）。
+
+### 9.3 指标定义（精确公式）
+
+设 agent 在每个 seat s ∈ {1,2,3,4} 下分别各打 N 局（共 4N 局），`rank(s,g)` ∈ {1,2,3,4}：
+
+$$
+\mathrm{MeanRank} = \frac{1}{4N}\sum_{s=1}^{4}\sum_{g=1}^{N}\mathrm{rank}(s,g)
+$$
+
+- `Rank 1 Rate` = `#(rank=1) / 4N`
+- `Placement Score` = `#(rank=1)/4N + 0.5·#(rank=2)/4N`
+- `pt/100 局` = 100 × 平均每局 `settlement_pt`（`rl_reward.settlement_pt(..., "tenhou")`）
+- `和牌率` = 我方和牌局数 / 我局数（从 `game.step` 返回的 `hora` 事件 actor 提取）
+- `放铳率` = 我方放铳局数 / 我局数（`hora` 事件 target 提取，`eval_sliding.py` 已有提取模式）
+
+**要求**：同时报告「每 seat 的结果」与「4 seat 汇总结果」（feedback1 §5）。
+
+### 9.4 seed 与座次协议
+
+| 项 | 值 |
+|---|---|
+| seed 数 | pilot 3，正式 5 |
+| 每 seed 局数 | pilot 500，正式 1000 |
+| 座次轮换 | 4 座位均衡轮换（agent 依次坐 seat 0/1/2/3，`eval_vs_sl.py` 已实现骨架） |
+| 总规模 | pilot 1500 局；正式 5000 局（目标 3000–5000） |
+| 混随机对手 | 默认**不混**；`--b random` 仅作 sanity 参照 |
+
+### 9.5 两阶段评估（feedback1 §16/§17）
+
+- **Stage A（pilot）**：`3 seeds × 500 局`，快速判断是否收敛、方差量级。
+- **Stage B（full）**：仅当 Stage A 结果接近/有争议时，扩展到 `5 seeds × 1000 局` 出正式结果。
+- 避免一开始 `5×1000` 才发现 RL 未收敛，浪费 GPU 时间。
+
+### 9.6 统计报告规范（feedback1 §14/§15）
+
+- `std` = **seed 间离散程度**（cross-seed SD），是分布宽度，不是估计精度。
+- `95% CI` = **估计量的不确定性**，统一用 **Bootstrap 95% CI**（resample 10000 次）。
+- **两个不要混**。最终报告两栏：`Mean ± SD across seeds` 与 `Bootstrap 95% CI`。
+- 不再同时出 t-CI 与 bootstrap CI 双轨；主体统一 bootstrap，seed 级 std 作附加信息。
+
+### 9.7 results.json 结构（feedback1 §13 · D4 输出契约）
+
+```json
+{
+  "experiment": "rl_vs_sl_v1",
+  "git_commit": "...",
+  "config_hash": "...",
+  "checkpoint_a": "...",
+  "checkpoint_b": "...",
+  "games_per_seed": 1000,
+  "seeds": [
+    {"seed": 1, "seat": 0, "games": 250,
+     "mean_rank": 2.41, "rank1_rate": 0.31, "placement_score": 0.46,
+     "win_rate": 0.31, "pt_per_100": 321, "win_rate_ci": [0.25, 0.37]}
+  ],
+  "aggregate": {
+    "mean_rank": {"mean": 2.40, "sd": 0.06, "ci95": [2.28, 2.52]},
+    "rank1_rate": {"mean": 0.31, "sd": 0.03, "ci95": [0.25, 0.37]}
+  }
+}
+```
+
+### 9.8 评估种子与轨迹再生（feedback1 §12）
+
+- 对局本身是随机环境，**不必固定「完整 trajectory」**。
+- 真正冻结的是：**模型权重 / seed protocol / benchmark config**。
+- 原则：`Evaluation seeds are fixed and independently generated from training seeds; game trajectories are generated online by the frozen policies.`
+
+---
+
+## 10. 防泄漏硬规则（协议 6.2）
+
+> 本规则为评估可信度的底线（feedback1 §10/§11 扩展）。任何违反即触发失败协议「评估异常」。
+
+1. **train/eval 分区不重叠**：同一牌局（以 `game_id` 维度切分）不同时进入训练与测试，沿用
+   `data/processed/tenhou/splits/` 约定；天凤留出集 `eval_holdout_games.txt` 永不进 SL 训练。
+2. **预处理统计量只在训练集拟合后冻结**（feedback1 §10）：
+   `All data-derived preprocessing statistics (normalization statistics, feature statistics,
+   reward-model preprocessing) are fitted on training data only and then frozen for evaluation.`
+   禁止用全量数据（含 eval/留出集）计算归一化/特征/奖励统计量。
+3. **RL 对手池不含独立测试模型权重**：对手池（self / past / sl）只用训练侧产物，评估集模型永不出现在训练对手池。
+4. **评估期模型不可变**（feedback1 §11）：
+   `Evaluation models must be immutable during evaluation.` 评估过程冻结参数，只 forward、不 backward、不更新权重。
+5. **评估种子独立**：评估种子固定且独立于训练种子；轨迹由冻结 policy 在线生成（见 §9.8）。

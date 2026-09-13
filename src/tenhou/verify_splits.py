@@ -10,7 +10,7 @@ Checks, per docs/observation_schema.md split rules:
 
 Usage:
   python src/tenhou/verify_splits.py
-  python src/tenhou/verify_splits.py --records "C:/agentwork/data/processed/tenhou/records-*.jsonl.gz"
+  python src/tenhou/verify_splits.py --records "<repo>/data/processed/tenhou/records-*.jsonl.gz"
 """
 from __future__ import annotations
 
@@ -23,9 +23,10 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from utils.paths import processed_dir
 from tenhou.stats import assign_split
 
-SPLITS = "C:/agentwork/data/processed/tenhou/splits/splits.json"
+SPLITS = str(processed_dir() / "tenhou/splits/splits.json")
 
 
 def load_lists(path=SPLITS):

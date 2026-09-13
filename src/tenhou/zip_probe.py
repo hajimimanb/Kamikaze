@@ -1,9 +1,13 @@
 """Background prober: poll tenhou scraw yearly zips; log when available."""
-import time, urllib.request, json, os
+import time, urllib.request, json, os, sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import processed_dir
 ZIPS = ['scraw2025.zip', 'scraw2024.zip', 'scraw2023.zip', 'scraw2022.zip', 'scraw2021.zip', 'scraw2020.zip', 'scraw2019.zip', 'scraw2018.zip', 'scraw2017.zip', 'scraw2016.zip', 'scraw2015.zip', 'scraw2014.zip', 'scraw2013.zip', 'scraw2012.zip', 'scraw2011.zip', 'scraw2010.zip', 'scraw2009.zip']
 BASE = 'https://tenhou.net/sc/raw/'
-LOG = 'C:/agentwork/data/processed/tenhou/logs/zip_probe.log'
-state = 'C:/agentwork/data/processed/tenhou/logs/zip_probe_state.json'
+LOG = str(processed_dir() / "tenhou/logs/zip_probe.log")
+state = str(processed_dir() / "tenhou/logs/zip_probe_state.json")
 
 def log(msg):
     line = time.strftime('%Y-%m-%d %H:%M:%S') + ' ' + msg

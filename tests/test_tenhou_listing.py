@@ -1,8 +1,12 @@
 import gzip
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import raw_dir, tmp_dir
 
 from tenhou.listing import parse_scc_bytes, phoenix_rows
 
@@ -12,7 +16,7 @@ def _load_gz(path):
 
 
 def test_parse_scc_2026_hour0():
-    data = _load_gz("C:/agentwork/data/tmp/scc_20260824/scc2026082400.html.gz")
+    data = _load_gz(str(tmp_dir() / "scc_20260824" / "scc2026082400.html.gz"))
     rows = parse_scc_bytes(data)
     assert rows, "hour 00 should have rows"
     lobbies = set(r["lobby"] for r in rows)
@@ -25,7 +29,7 @@ def test_parse_scc_2026_hour0():
 
 
 def test_phoenix_filter():
-    data = _load_gz("C:/agentwork/data/tmp/scc_20260824/scc2026082400.html.gz")
+    data = _load_gz(str(tmp_dir() / "scc_20260824" / "scc2026082400.html.gz"))
     rows = phoenix_rows(parse_scc_bytes(data))
     assert rows
     assert all(r["lobby"] == "00a9" for r in rows)
@@ -33,7 +37,7 @@ def test_phoenix_filter():
 
 def test_full_day_count():
     import glob
-    files = sorted(glob.glob("C:/agentwork/data/raw/listings/scc_20260824/*.gz"))
+    files = sorted(glob.glob(str(raw_dir() / "listings" / "scc_20260824" / "*.gz")))
     assert len(files) == 24
     total = 0
     for f in files:
@@ -67,7 +71,7 @@ def test_zip_fallback_extraction():
 def test_daily_scheme_january():
     # older dates only have daily files (scc{yyyymmdd}.html.gz)
     import glob
-    files = glob.glob("C:/agentwork/data/raw/listings/scc_20260110/*.gz")
+    files = glob.glob(str(raw_dir() / "listings" / "scc_20260110" / "*.gz"))
     if not files:
         import pytest
         pytest.skip("January daily listing not cached yet")

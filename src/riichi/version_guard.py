@@ -30,6 +30,6 @@ def assert_versions() -> None:
     if problems:
         raise RuntimeError(
             "[version-guard] dependency mismatch: " + "; ".join(problems) + ". "
-            "Fix: C:/agentwork/.venv/Scripts/python.exe -m pip install mahjong==2.0.0 "
+            "Fix: python -m pip install mahjong==2.0.0 "
             "(mjai 0.2.1 metadata may downgrade it on install; mjai still works "
             "with 2.0.0 - see requirements.txt note)")

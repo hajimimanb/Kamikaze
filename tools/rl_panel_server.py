@@ -3,12 +3,15 @@
 满足"3 进程架构"：训练 / 评估 / 面板各一个 python 进程。
 """
 import os, sys, threading, time
-
-sys.path.insert(0, "C:/agentwork/tools")
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "tools"))
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import checkpoints_dir
 from rl_train_dashboard import render
 
 HOST, PORT = "0.0.0.0", 8090
-DIR = "C:/agentwork/checkpoints"
+DIR = str(checkpoints_dir())
 
 
 def serve():

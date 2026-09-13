@@ -9,8 +9,12 @@ Uses Playwright with the system Edge (browser fingerprint) to:
 import asyncio
 import json
 import sys
+from pathlib import Path
 
 from playwright.async_api import async_playwright
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
+from utils.paths import tmp_dir
 
 CAP_ENDPOINT = "https://akcap.pikapika.me/14f343ec68/"
 DATA_MIRRORS = [
@@ -265,7 +269,7 @@ async def main():
         page = await ctx.new_page()
         await page.goto("about:blank")
         result = await page.evaluate(js)
-        with open("C:/agentwork/data/tmp/last_cap_result.json", "w", encoding="utf-8") as f:
+        with open(str(tmp_dir() / "last_cap_result.json"), "w", encoding="utf-8") as f:
             f.write(json.dumps(result, ensure_ascii=False))
         print(json.dumps(result, ensure_ascii=False)[:20000])
         await browser.close()

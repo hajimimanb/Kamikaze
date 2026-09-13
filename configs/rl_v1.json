@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "name": "rl_v1",
+    "description": "Kamikaze RL v1 self-play PPO experiment definition (frozen). One config = one experiment definition, per feedback1 section 26.",
+    "config_version": "1.0.0",
+    "schema": "configs/schema.json",
+    "frozen_from": "e9992ca",
+    "freeze_note": "git history is documentation-only (9 commits); tags use lowercase names (sl-v1 / rl-v1 / rl-v1-event-attn / rl-v1-reward) frozen at current commit e9992ca per feedback2 section 4."
+  },
+  "environment": {
+    "aka": true,
+    "kuitan": true,
+    "kuikae": false,
+    "kiriage_mangan": false,
+    "atamahane": true,
+    "double_ron": true,
+    "nagashi_mangan": true,
+    "kyushu_kyuhai": true,
+    "four_winds_ryuukyoku": true,
+    "four_kans_ryuukyoku": true,
+    "chankan_kokushi": false,
+    "agari_yame": true,
+    "west_extension": true,
+    "start_score": 25000,
+    "return_score": 30000,
+    "double_yakuman": false,
+    "kazoe_limit_source": "mahjong.HandConstants.KAZOE_LIMITED"
+  },
+  "model": {
+    "feature_mode": "full",
+    "channels": 256,
+    "n_blocks": 50,
+    "binary_heads": ["riichi", "chow", "pon", "kan"],
+    "include_value": true,
+    "use_event_attn": false,
+    "inj_scale": 0.02,
+    "ctx_gate_init": -1.0
+  },
+  "training": {
+    "games_per_epoch": 10,
+    "epochs": 1000,
+    "optimizer": "adamw",
+    "lr": 0.0003,
+    "lr_trunk_ratio": 0.1,
+    "clip": 0.2,
+    "clip_grad": 1.0,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy_coef": 0.01,
+    "vf_coef": 0.5,
+    "temperature": 1.0,
+    "seed": 0,
+    "eval_every": 10,
+    "eval_games": 2,
+    "save_every": 100,
+    "pool_k": 5,
+    "phi_monitor_every": 500,
+    "t5_every": 100,
+    "t5_games": 40
+  },
+  "reward": {
+    "dense": "phi_diff",
+    "terminal": "settlement_pt",
+    "settlement_rule": "tenhou",
+    "phi": {
+      "feat_dim": 16,
+      "hidden": 512,
+      "num_layers": 2
+    }
+  },
+  "opponent_pool": {
+    "strategy": "self_hist_sl",
+    "p_self": 0.6,
+    "p_past": 0.25,
+    "p_sl": 0.15,
+    "k": 5,
+    "past_cache_max": 3
+  },
+  "evaluation": {
+    "primary_metric": "mean_rank",
+    "secondary_metrics": ["rank1_rate", "placement_score", "pt_per_100"],
+    "ci_method": "bootstrap",
+    "ci_level": 0.95,
+    "n_bootstrap": 10000,
+    "seat_rotation": true,
+    "placement_score_definition": "P(rank1) + 0.5 * P(rank2)",
+    "pilot": {"seeds": 3, "games_per_seed": 500},
+    "full": {"seeds": 5, "games_per_seed": 1000}
+  },
+  "runtime": {
+    "checkpoints": "checkpoints",
+    "logs": "logs",
+    "data": "data",
+    "raw": "data/raw",
+    "processed": "data/processed",
+    "tmp": "data/tmp"
+  }
+}

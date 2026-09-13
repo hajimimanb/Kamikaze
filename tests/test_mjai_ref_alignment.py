@@ -9,9 +9,13 @@ Replicates the serde constraints of the official parser:
 """
 import json
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import raw_dir, tmp_dir
 
 from tenhou.mjlog_parser import parse_game_file
 from tenhou.mjai_export import build_events, mask_events
@@ -106,14 +110,14 @@ def _check_events(events):
 
 
 def test_sample_alignment():
-    g = parse_game_file("C:/agentwork/data/tmp/log0.html")
+    g = parse_game_file(str(tmp_dir() / "log0.html"))
     g["log_id"] = "x"
     _check_events(build_events(g))
 
 
 def test_edge_fixtures_alignment():
     import glob
-    for f in sorted(glob.glob("C:/agentwork/data/tmp/edge_fixtures/*.xml"))[:4]:
+    for f in sorted(glob.glob(str(tmp_dir() / "edge_fixtures" / "*.xml")))[:4]:
         g = parse_game_file(f)
         g["log_id"] = "x"
         _check_events(build_events(g))
@@ -121,7 +125,7 @@ def test_edge_fixtures_alignment():
 
 def test_old_fixtures_alignment():
     import glob
-    for f in sorted(glob.glob("C:/agentwork/data/tmp/old_fixtures/*.xml"))[:6]:
+    for f in sorted(glob.glob(str(tmp_dir() / "old_fixtures" / "*.xml")))[:6]:
         g = parse_game_file(f)
         g["log_id"] = "x"
         _check_events(build_events(g))
@@ -129,7 +133,7 @@ def test_old_fixtures_alignment():
 
 def test_real_day_sample_alignment():
     import glob as g
-    files = sorted(g.glob("C:/agentwork/data/raw/mjlog/2026/20260824*.xml.gz"))
+    files = sorted(g.glob(str(raw_dir() / "mjlog" / "2026" / "20260824*.xml.gz")))
     assert files
     for f in files[:20]:
         game = parse_game_file(f)
@@ -141,7 +145,7 @@ def test_masked_version():
     """The masked view (seat 0) hides other players' tehais and tsumo tiles
     and keeps everything else identical; it must still pass the schema check
     ("?" is an allowed tile string)."""
-    g = parse_game_file("C:/agentwork/data/tmp/log0.html")
+    g = parse_game_file(str(tmp_dir() / "log0.html"))
     g["log_id"] = "x"
     events = build_events(g)
     masked = mask_events(events, 0)

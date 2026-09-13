@@ -4,13 +4,17 @@
 输出: checkpoints/rl_train_panel.html（5s 刷新）
 异常机制: ratio 偏离 / NaN / gate 锁死 / clip 率 / value 尺度 / wr 回退 / 进度停滞 / 进程死亡
 """
-import datetime, json, os, re, subprocess, time
+import datetime, json, os, re, subprocess, sys, time
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import logs_dir, checkpoints_dir
 
-METRICS = "C:/agentwork/logs/rl_train_metrics.jsonl"
-TRAINLOG = "C:/agentwork/logs/rl_train.txt"
-GAMES_PATH = "C:/agentwork/logs/rl_train_games.jsonl"
-OUT = "C:/agentwork/checkpoints/rl_train_panel.html"
-PHI_MON = "C:/agentwork/logs/rl_phi_monitor.json"
+METRICS = str(logs_dir() / "rl_train_metrics.jsonl")
+TRAINLOG = str(logs_dir() / "rl_train.txt")
+GAMES_PATH = str(logs_dir() / "rl_train_games.jsonl")
+OUT = str(checkpoints_dir() / "rl_train_panel.html")
+PHI_MON = str(logs_dir() / "rl_phi_monitor.json")
 
 STYLE = """<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
 <meta http-equiv="refresh" content="5"><title>RL 训练实时监控</title>
@@ -373,8 +377,8 @@ def _sliding_eval_html():
     数据：logs/vs_sl_sliding.jsonl（聚合点）+ vs_sl_sliding_games.jsonl（每局）"""
     import json as _json
     rows = []
-    if os.path.exists("C:/agentwork/logs/vs_sl_sliding.jsonl"):
-        for _ln in open("C:/agentwork/logs/vs_sl_sliding.jsonl", encoding="utf-8", errors="ignore"):
+    if os.path.exists(str(logs_dir() / "vs_sl_sliding.jsonl")):
+        for _ln in open(str(logs_dir() / "vs_sl_sliding.jsonl"), encoding="utf-8", errors="ignore"):
             _ln = _ln.strip()
             if _ln:
                 try:
@@ -382,8 +386,8 @@ def _sliding_eval_html():
                 except Exception:
                     pass
     gs = []
-    if os.path.exists("C:/agentwork/logs/vs_sl_sliding_games.jsonl"):
-        for _ln in open("C:/agentwork/logs/vs_sl_sliding_games.jsonl", encoding="utf-8", errors="ignore"):
+    if os.path.exists(str(logs_dir() / "vs_sl_sliding_games.jsonl")):
+        for _ln in open(str(logs_dir() / "vs_sl_sliding_games.jsonl"), encoding="utf-8", errors="ignore"):
             _ln = _ln.strip()
             if _ln:
                 try:
@@ -393,8 +397,8 @@ def _sliding_eval_html():
     # 实时对局进度（评估进行中）
     prog = {}
     try:
-        if os.path.exists("C:/agentwork/logs/vs_sl_eval_progress.json"):
-            prog = _json.loads(open("C:/agentwork/logs/vs_sl_eval_progress.json", encoding="utf-8").read())
+        if os.path.exists(str(logs_dir() / "vs_sl_eval_progress.json")):
+            prog = _json.loads(open(str(logs_dir() / "vs_sl_eval_progress.json"), encoding="utf-8").read())
     except Exception:
         pass
     prog_html = ""

@@ -13,7 +13,11 @@ import re
 import sys
 import time
 import urllib.request
+from pathlib import Path
 from typing import Dict, List
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.paths import processed_dir
 
 ENTRY_RE = re.compile(r"\{file:'([^']+)',size:(\d+)\}")
 
@@ -22,7 +26,7 @@ URLS = {
     "old": "https://tenhou.net/sc/raw/list.cgi?old",
 }
 
-DEFAULT_OUT = "C:/agentwork/data/processed/tenhou/index_manifest.json"
+DEFAULT_OUT = str(processed_dir() / "tenhou/index_manifest.json")
 
 
 def _fetch(url: str, timeout: int = 30, retries: int = 3) -> str:

@@ -12,9 +12,13 @@ stream and must agree. Checks (per game):
 """
 import json
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "C:/agentwork/src")
-sys.path.insert(0, "C:/agentwork")
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO))
+
+from utils.paths import tmp_dir
 
 from tenhou.mjlog_parser import parse_game_file
 from tenhou.mjai_export import build_events, tile_str
@@ -144,7 +148,7 @@ def _check_game(path, game_id=None):
 def test_label_tsumogiri_field():
     """discard/riichi labels carry an explicit tsumogiri flag (captain
     enhancement); riichi declarations are always recorded as hand-cut."""
-    g = parse_game_file("C:/agentwork/data/tmp/log0.html")
+    g = parse_game_file(str(tmp_dir() / "log0.html"))
     g["log_id"] = "x"
     records = []
     stats = GameStats()
@@ -165,14 +169,14 @@ def test_label_tsumogiri_field():
 
 
 def test_sample_consistency():
-    n, stats = _check_game("C:/agentwork/data/tmp/log0.html")
+    n, stats = _check_game(str(tmp_dir() / "log0.html"))
     assert n > 0
     assert stats["anomalies"] == 0
 
 
 def test_edge_fixtures_consistency():
     import glob
-    files = sorted(glob.glob("C:/agentwork/data/tmp/edge_fixtures/*.xml"))
+    files = sorted(glob.glob(str(tmp_dir() / "edge_fixtures" / "*.xml")))
     assert files
     for f in files[:4]:
         n, stats = _check_game(f)
@@ -181,7 +185,7 @@ def test_edge_fixtures_consistency():
 
 def test_old_fixtures_consistency():
     import glob
-    files = sorted(glob.glob("C:/agentwork/data/tmp/old_fixtures/*.xml"))
+    files = sorted(glob.glob(str(tmp_dir() / "old_fixtures" / "*.xml")))
     assert files
     for f in files[:6]:
         n, stats = _check_game(f)

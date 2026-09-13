@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-import json, os
-# 面板追加：每局实时数据（games.jsonl）——滚动表 + 滑动曲线 + 累计卡片
-GAMES = "C:/agentwork/logs/rl_train_games.jsonl"
+import json, os, sys
+from pathlib import Path
+_REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO / "src"))
+from utils.paths import logs_dir
+
+GAMES = str(logs_dir() / "rl_train_games.jsonl")
 
 
 

@@ -18,8 +18,11 @@ import urllib.error
 import urllib.request
 
 import sys
+from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from utils.paths import raw_dir
 import cap_client
 
 MIRRORS = [
@@ -33,9 +36,9 @@ API_V2 = "api/v2/pl4"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
 
-GAME_LIST_FILE = "C:/agentwork/data/raw/majsoul/game_list.jsonl"
-UUID_LIST_FILE = "C:/agentwork/data/raw/majsoul/uuid_list.txt"
-CURSOR_FILE = "C:/agentwork/data/raw/majsoul/cursor.json"
+GAME_LIST_FILE = str(raw_dir() / "majsoul/game_list.jsonl")
+UUID_LIST_FILE = str(raw_dir() / "majsoul/uuid_list.txt")
+CURSOR_FILE = str(raw_dir() / "majsoul/cursor.json")
 
 
 class ApiError(Exception):

@@ -20,10 +20,11 @@ from collections import Counter
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from utils.paths import raw_dir, docs_dir
 from tenhou.mjlog_parser import parse_game_file
 
-RAW = "C:/agentwork/data/raw/mjlog"
-OUT = "C:/agentwork/docs/kuitan_stat.md"
+RAW = str(raw_dir() / "mjlog")
+OUT = str(docs_dir() / "kuitan_stat.md")
 TANYAO = 8
 DORA_IDS = (52, 53, 54)
 FIXED_DAYS = ("20260101", "20260824")
