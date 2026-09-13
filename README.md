@@ -19,21 +19,7 @@
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    A[Tenhou Logs] --> B[Data Pipeline]
-    B --> C[State Features 284x34]
-    C --> D[MultiHeadRiichiNet ~21M]
-    D --> E[Decoupled Policy Heads]
-    D --> F[Value Head]
-    G[Event Sequence] --> H[Event Causal Attention]
-    H --> D
-    I[Reward Predictor Phi] --> J[PPO Self-Play]
-    E --> J
-    F --> J
-    J --> K[Checkpoint]
-    K --> L[Evaluation infra]
-```
+![Kamikaze Architecture](./docs/mermaid-diagram.png)
 
 - **规则引擎**（`src/env/riichi_game.py`）：完整立直麻将规则（立直/一发/宝牌/杠/流局/高点法），与天凤逐条 oracle 验证；通过 **mjai JSON 协议**接入任意外部决策者。
 - **模型**（`src/model/net.py`）：共享主干（Stem + 50 Residual Blocks）+ 解耦决策头 + Event 因果注意力旁支，约 21M 参数。
