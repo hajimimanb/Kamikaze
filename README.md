@@ -1,232 +1,232 @@
 # Kamikaze — Riichi Mahjong AI（神风 · 日麻 AI）
 
-独立实现的立直麻将 AI + 可独立部署的日麻规则引擎，基于天凤（Tenhou）对局日志，以 SL（监督学习）初始化和 PPO 自对弈强化学习构建完整系统。
+独立实现的**日麻 AI** 与**可独立运行的日麻规则引擎**，基于天凤（Tenhou）对局日志，以 SL（监督学习）初始化和 PPO 自对弈强化学习构建完整系统。
 
-> **Status：`Engineering Validation: Complete` · `Scientific Evaluation: Deferred`**
-> 大型 RL 训练与 vs-SL 统计评估因计算预算与项目时间分配暂缓；**本仓库不主张 RL 优于 SL 的结论**。详见 [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)。
+> **Status**
+> - **Engineering Validation: Complete**
+> - **Scientific Evaluation: Deferred**
+> - **No claim is made that the RL policy outperforms the SL baseline.**
+>
+> 详见 [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)。
 
-## 这是什么
+---
 
-**Kamikaze 是一个日麻（立直麻将）项目，包含两大部分**：
+## Why this project?
 
-1. **日麻规则引擎**（`src/env/riichi_game.py`）：完整实现立直麻将规则（立直/一发/宝牌/杠/流局/高点法），
-   规则与天凤（Tenhou）逐条 oracle 验证。可**单独部署**，通过 **mjai JSON 协议**驱动对局，
-   接入任何外部决策者（人类、AI、脚本）。
-2. **日麻 AI 模型**：基于天凤牌谱训练（SL 迁移 → Φ 全局奖励预测 → PPO 自对弈强化学习），
-   当前打法为**副露流**（激进吃碰杠），含完整训练/评估/监控工具链。
+本项目聚焦的重点不是堆叠模型规模，而是**构建一条完整、可检查的管线**：从真实对局日志、环境建模，到策略学习、自对弈与可复现评估。目标是把「从数据到系统」的通路做成一个可逐环节检查、可复现、且每一条结论都可追溯的独立研究/工程系统。
 
-## Project Status（项目状态）
+---
 
-> **Frozen at the engineering-validation milestone.** 当前冻结于**工程验证里程碑**。
+## Architecture
 
-- **Engineering Validation：Complete**（环境 / 数据管线 / SL / 奖励建模 / 自对弈 PPO / 评估与可复现基础设施 / D0 回归 均达成）
-- **Scientific Evaluation：Not completed**（RL 大规模训练、vs-SL 多 seed 统计评估、ablation、Human 行为分析 **未包含在本次发布中**）
-- 原因归因：`deferred due to the available compute budget`（计算预算），而非"环境无法训练"。
+```mermaid
+flowchart TD
+    A[Tenhou Logs] --> B[Data Pipeline]
+    B --> C[State Features 284x34]
+    C --> D[MultiHeadRiichiNet ~21M]
+    D --> E[Decoupled Policy Heads]
+    D --> F[Value Head]
+    G[Event Sequence] --> H[Event Causal Attention]
+    H --> D
+    I[Reward Predictor Phi] --> J[PPO Self-Play]
+    E --> J
+    F --> J
+    J --> K[Checkpoint]
+    K --> L[Evaluation infra]
+```
 
-> **No claim is made that the RL policy outperforms the SL baseline.**
-> README 中任何训练方式与历史表现仅作说明，不构成已证实的科研结论。
+- **规则引擎**（`src/env/riichi_game.py`）：完整立直麻将规则（立直/一发/宝牌/杠/流局/高点法），与天凤逐条 oracle 验证；通过 **mjai JSON 协议**接入任意外部决策者。
+- **模型**（`src/model/net.py`）：共享主干（Stem + 50 Residual Blocks）+ 解耦决策头 + Event 因果注意力旁支，约 21M 参数。
+- **训练**：SL 初始化 → Φ 全局奖励预测 → PPO 自对弈（对手池 / 事件注意力 / 稀有动作加权）。
 
-## 快速开始
+---
 
-### 方式 A：只使用规则引擎（mjai 协议）
+## Project Status
 
-引擎不依赖任何训练产物，单独导入即可驱动对局。引擎在 `src/` 下，示例需在仓库根目录用
-项目 venv 运行（或 `PYTHONPATH=src`）：`cd 仓库根目录 && .venv/Scripts/python.exe your_script.py`
+> **Frozen at the engineering-validation milestone.**
+
+- **Engineering Validation：Complete** —— 环境、数据管线、SL/Reward/PPO/Self-play、对手池、事件注意力、评估与可复现基础设施、D0 回归、单元测试均达成。
+- **Scientific Evaluation：Deferred** —— RL 大规模重训、vs-SL 多 seed 统计评估、ablation、Human 行为分析**未包含在本次发布**。
+
+归因：大型 RL 实验因当前**计算预算与项目时间分配**暂缓（非"环境无法训练"）。README 中任何训练方式与历史表现仅作说明，不构成已证实的科研结论。
+
+---
+
+## Quick Start
+
+> 各模式的**可运行条件**标注如下，避免 clone 后因缺环境误判为项目损坏。
+
+### A. Rule Engine —— ✅ 仓库内即可运行
+
+引擎不依赖任何训练产物，单独导入即可驱动对局：
 
 ```python
 from env.riichi_game import RiichiGame, RiichiConfig
 
 game = RiichiGame(RiichiConfig(), seed=42)     # 新建一局（东四局制）
 while game.phase != "game_end":
-    obs = game.state.get_observation()          # 可观察状态（手牌/牌河/副露/宝牌…）；无参=当前决策者
-    la = game.legal_actions()                   # 合法动作（discard/riichi/pon/chi/kan/ron/tsumo…）
-    # 由你的决策者给出动作（mjai 风格字典）：
+    obs = game.state.get_observation()          # 可观察状态（无参 = 当前决策者）
     action = game.random_action()               # 或 game.step({"type": "discard", "tile": 0})
     res = game.step(action)                     # 推进引擎
-    for ev in res["events"]:                    # mjai JSON 事件流
-        print(ev)                               # start_kyoku/dahai/reach/pon/chi/kan/hora/ryuukyoku…
+    for ev in res["events"]:
+        print(ev)                               # mjai JSON 事件流
 ```
 
-**动作协议**（mjai 风格 JSON）：
-- 切牌/立直：`{"type": "discard", "tile": 0}` / `{"type": "riichi", "tile": 5}`
-- 吃/碰/杠：`{"type": "pon", "tiles": [1, 2, 3]}` / `{"type": "chow", "tiles": [...]}` / `{"type": "kan", "tiles": [...]}`
-- 和/过：`{"type": "ron"}` / `{"type": "tsumo"}` / `{"type": "pass"}`
-- 牌编码：tile136 整数 0–135，满足 `tile = kind×4 + copy`（每种牌 4 个 id，copy=0..3）：
-  - kind 0–33：0-8=1m-9m、9-17=1p-9p、18-26=1s-9s、27-30=E/S/W/N、31-33=白/發/中
-  - 例：1m=0-3，2m=4-7，…，9m=32-35，1p=36-39，…，7z(中)=132-135
-  - 赤宝牌固定 id：赤5m=16、赤5p=52、赤5s=88（kind 4/13/22 的 copy 0）
-  - 与 mjai 牌串互转：`mjai_pai(tile)`（如 16→"5mr"）/ `parse_mjai_pai("1m")`
+- **动作协议**（mjai 风格 JSON）：切牌/立直 `{"type":"discard","tile":0}` / `{"type":"riichi","tile":5}`；吃/碰/杠 `{"type":"pon","tiles":[...]}`；和/过 `{"type":"ron"}` / `{"type":"pass"}`。
+- **事件流**：`start_kyoku / tsumo / dahai / reach / chi / pon / ankan / daiminkan / kakan / dora / hora / ryuukyoku / end_kyoku / end_game`；杠按 `ankan/daiminkan/kakan` 区分，鸣牌含 `consumed/from`，与 [mjai.app](https://github.com/mjai/mjai) 对齐。
+- **牌编码**：tile136 整数 0–135（`tile = kind×4 + copy`）；赤宝牌固定 id 赤5m=16 / 赤5p=52 / 赤5s=88。
+- **默认规则**：赤宝 ON、喰断 ON、喰替 OFF、双响 ON、无切上满贯、役满单倍、西入 ON、连庄制和 ON、起分 25000 / 返し 30000，与天凤一致；可按 `RiichiConfig(kiriage_mangan=True, ...)` 覆盖。
 
-**事件流**：mjai JSON（`start_kyoku`/`tsumo`/`dahai`/`reach`/`chi`/`pon`/`ankan`/`daiminkan`/`kakan`/`dora`/`hora`/`ryuukyoku`/`end_kyoku`/`end_game`；
-杠事件按 `ankan`（暗杠）、`daiminkan`（大明杠）、`kakan`（加杠）区分，鸣牌事件含 `consumed`/`from` 字段），
-与 [mjai.app](https://github.com/mjai/mjai) 协议对齐，可直接对接外部对局环境。
-
-**默认规则**（`RiichiConfig()`，与天凤逐条 oracle 验证一致）：
-- 赤宝牌 ON、喰断（副露断幺）ON、喰替（换吃）OFF
-- **双响（double ron）ON**；三响 = 三家和流局（无结算、庄家连庄、立直棒保留）
-- **无切上满贯**（kiriage OFF，天凤无切上）；**役满单倍**（无双重役满，含四暗刻单骑/国士十三面）
-- 暗杠不可抢（含国士）；仅加杠（kakan）可被枪杠
-- 流局：九种九牌 / 四风连打 / 四杠散 / 四家立直 / 三家和；流局满贯（nagashi）ON
-- 西入 ON（南四局后全员低于返し 30000 继续西场，庄家过线即止）；连庄制和（agari-yame）ON
-- 起分 25000 / 返し 30000
-可按规则集覆盖：`RiichiConfig(kiriage_mangan=True, double_ron=False, atamahane=True, double_yakuman=True, ...)`
-（`atamahane` 仅在 `double_ron=False` 时生效）。
-
-### 方式 B：训练 AI
+### B. Training —— ⚠️ 需要 NVIDIA/CUDA + 训练数据
 
 ```bash
 pip install -r requirements.txt
-# 1) Φ 奖励预测器（16 维特征，Tenhou 27.5K 局牌谱）
-python tools/train_reward_pred.py
-# 2) RL 自对弈（20 局/epoch × 500 epoch = 10K 局；单 GPU 约数天）
-python tools/start_rl_train.py
+python tools/train_reward_pred.py     # Φ 奖励预测器（Tenhou 27.5K 局牌谱）
+python tools/start_rl_train.py        # RL 自对弈（计划 10K 局 / 500 epoch；需 GPU，约数天）
 ```
 
-### 方式 C：评估模型
+### C. Evaluation —— ⚠️ 需要 PyTorch + checkpoints
 
 ```bash
-# 验收（1200 局：rank 均值≥0.66 且 CI 下界≥0.60 通过）
-python tools/eval_vs_sl.py --a checkpoints/sl/rl/rl_v1.pt \
-    --b checkpoints/sl/transfer/transfer_final.pt --games 100 --seeds 3 --event-attn
-# pt 口径（最近 20 局：pt 加权胜率 + 每百局 pt）
-python tools/eval_vs_sl.py --a checkpoints/sl/rl/rl_v1.pt \
-    --b checkpoints/sl/transfer/transfer_final.pt --games 5 --seeds 1 --pt --window 20 --event-attn
+python tools/eval_vs_sl.py --a <rl.pt> --b <transfer_final.pt> --games 100 --seeds 3 --event-attn
 ```
 
-### 方式 D：实时监控面板
+> 本机缺少运行该评估所依赖的 NVIDIA/CUDA 与 checkpoints；具体运行步骤见 `docs/gpu_runbook.md`。
+
+### D. Training Monitor —— ⚠️ 需要训练日志
 
 ```bash
-python tools/rl_panel_server.py   # render 循环 + http.server 8090
-# 浏览器打开 http://127.0.0.1:8090/rl_train_panel.html
+python tools/rl_panel_server.py       # render 循环 + http.server:8090；浏览器打开 /rl_train_panel.html
 ```
 
-### 方式 E：使用 RL 模型（Kamikaze 自对弈提升版）
+### E. RL Inference —— ✅ 随仓库分发的模型可直接运行
 
-加载强化学习模型决策（与引擎对局 / 接入外部环境）。**模型已随仓库分发**（fp16 版，`models/kamikaze_rl_v1_fp16.pt`，~58MB）：
+加载**已随仓库分发**的 RL 模型（fp16 版，`models/kamikaze_rl_v1_fp16.pt`，~58MB）与引擎对局：
 
 ```python
 from agent.policy import RiichiPolicy
 from env.riichi_game import RiichiGame, RiichiConfig
 
-# 1) 加载 RL 模型（fp16 分发版，自动转 fp32；启用事件注意力旁支）
 policy = RiichiPolicy("models/kamikaze_rl_v1_fp16.pt", seed=0, use_event_attn=True)
-
-# 2) 单步决策：
-obs = game.state.get_observation()
-action = policy.act(obs)                 # 确定性部署（阈值判定）
-# 或采样（探索）：action, logp, value, ent = policy.sample_with_logp(obs, temperature=1.0)
-
-# 3) 整局对战（AI 坐 0 位，其余随机）：
 game = RiichiGame(RiichiConfig(), seed=42)
 while game.phase != "game_end":
     game.step(policy(game) if game.turn == 0 else game.random_action())
-
-# 4) 事件注意力自动接入：policy(game) 传入真实时间线事件
 ```
 
-### 方式 F：使用 SL 模型（监督学习基线）
+### F. SL model —— ⚠️ 基线模型未随仓库分发
 
-SL 模型是仅用**监督学习**训练于天凤牌谱的基线（无 RL 自对弈提升），是 RL 版的起点：
+SL 基线（`transfer_final.pt`）为 RL 版的监督学习起点，文件较大**未随仓库分发**，需按 B 的 SL 阶段训练产出，或自行放置到对应路径后再用。
 
-```python
-# 加载 SL 基线模型（无事件注意力旁支）
-sl_policy = RiichiPolicy("checkpoints/sl/transfer/transfer_final.pt", seed=0, use_event_attn=False)
+> **模型路径区分**
+> - **Bundled（已分发）**：`models/kamikaze_rl_v1_fp16.pt`（RL，fp16）
+> - **Training output（未分发）**：`checkpoints/...`（如 SL `transfer_final.pt`、ablation 各变体）
+> 只有 `models/kamikaze_rl_v1_fp16.pt` 可在 checkout 后直接运行。
 
-# 使用方式与 RL 版相同：
-#   action = sl_policy.act(obs)                     # 单步
-#   game.step(sl_policy(game) if game.turn == 0 else game.random_action())  # 整局
+---
+
+## Problem Formulation
+
+日麻（Riichi Mahjong）是不完全信息、多玩家、随机性的序贯决策问题。Kamikaze 以**逐决策策略学习**为目标：给定可观察到的手牌/牌河/副露/宝牌/风，输出动作分布。长程结果（终局点数）由独立的价值模型 Φ 建模，作为自对弈的奖励信号。
+
+---
+
+## Dataset
+
+> **⚠️ Dataset Notice: Tenhou logs are not included in this repository.** 用户须自行按原条款获取并使用天凤（Tenhou）公开对局日志，详见 `docs/data_license_check.md`。
+
+- **来源**：天凤公开对局日志（2026-01 日期段）。
+- **规模**：处理后的逐决策记录 **27,579 局**（`transfer_records`）→ 用于 Φ 奖励预测器训练。
+- **记录格式**：JSON 行 + gzip，`.jsonl.gz`，每行 = 一个人在当前决策时刻的完整可观察状态（seat/round/honba/scores/oya/riichi_sticks/wall_left/dora/hand/melds/discards/legal_actions/label）。
+- **处理管线**：`src/tenhou/`（下载 → 解析 mjlog → 校验 → 提取逐决策记录）；数据不随仓库分发。
+
+---
+
+## Model
+
+### MultiHeadRiichiNet（src/model/net.py）
+单模型共享主干 + 多决策头（约 21M 参数，fp32 ~122MB）：
+
 ```
-
-**SL 与 RL 版区别**：
-- **SL 版**（transfer_final）：从 Tenhou 职业/高段位牌谱逐决策监督学习（切牌/立直/吃/碰/杠分别建模），
-  学习人类动作分布——是"模仿人类"的基线，稳定但无自我提升。
-- **RL 版**（Kamikaze）：在 SL 版基础上用 **PPO 自对弈强化学习**提升（Φ 全局奖励 + 对称和牌/放铳奖励），
-  并学习出自身的打法风格（当前为副露流）。RL 版为当前主推模型；SL 版可作基线对照（评估用 `--b transfer_final.pt`）。
-
-**说明**：SL 模型（transfer_final.pt）文件较大未随仓库分发，需按"方式 B"的 SL 阶段训练产出，
-或自行放置到 `checkpoints/sl/transfer/transfer_final.pt`；RL fp16 版已随仓库分发。
-
-## 模型架构
-
-### 主干：MultiHeadRiichiNet（src/model/net.py）
-单模型共享主干 + 多决策头（约 2100 万参数，fp32 ~122MB）：
-
-```
-输入: 284 通道特征 × 34 牌位（手牌/牌河/副露/宝牌/风/自风/赤宝/危险度等）
+输入: 284 通道 × 34 牌位特征（手牌/牌河/副露/宝牌/风/自风/赤宝/危险度…）
   ↓
-Stem: Conv1d(284 → 256, kernel=3, padding=1)
+Stem: Conv1d(284 → 256, k=3)
   ↓
-Trunk: 50 × ResidualBlock(256)         # Conv1d(256,256,3)×2 + ReLU 残差
-  ↓  ← ② 事件因果注意力注入（可选，默认开启）
+Trunk: 50 × ResidualBlock(256)
+  ↓  ← Event 因果注意力注入（可选，默认开）
 Decoupled Heads:
-  ├─ DiscardHead(34)     切牌头: Conv(256→32) + FC(32×34→1024→256→34)
-  ├─ BinaryHead × 7      二值决策头: Conv(256→64) + FC(64×34+34→512→2)
-  │    ├─ 立直/吃/碰/杠（学习执行时机）
-  │    └─ 荣和/自摸/九种九牌
-  └─ ValueHead(1)        价值头（PPO critic）
+  ├─ DiscardHead(34)    切牌头
+  ├─ BinaryHead × 7     立直/吃/碰/杠/荣和/自摸/九种九牌（学习执行时机）
+  └─ ValueHead(1)       PPO critic
 ```
 
-### ② 事件因果注意力（src/model/attn_modules.py）
-- 8 头自注意力：输入公开事件序列（64 事件 × 46 维），因果掩码只看过去
-- 门控注入 `h += inj_scale(0.02)×σ(gate)×tanh(ctx)`，防 logit 放大失控
+### Event Causal Attention（src/model/attn_modules.py）
+8 头自注意力，输入公开事件序列（64×46 维），**因果掩码只看过去**；门控注入防 logit 放大失控。
 
-### Φ 全局奖励预测器（src/model/rl_reward.py，Suphx 式）
-- GRU 2 层(512)+2 FC；输入 16 维轮级特征（记分板 12：得分/累计/庄/本场/棒/风/夹取/标志 + 手牌 4：向听/听牌/宝牌/副露）
-- 标签 = 终局精算点数 settlement_pt；奖励 = Φ(前缀k) − Φ(前缀k−1) 差分分配
+### Φ Reward Predictor（src/model/rl_reward.py，Suphx 式）
+GRU(512)×2 + 2 FC；输入 16 维轮级特征（记分板 12 + 手牌 4）；标签 = 终局精算点数；奖励按 Φ(前缀) 差分分配。
 
-## 训练方法
+> 说明：模型架构是全轮表征共享的，具体差分为事件注意力开关与奖励结构（见 Ablations 的 config 变体）。
 
-### 奖励结构（全部 pt 量纲，热可调）
+---
+
+## Training
+
+- **SL Initialization**：从 Tenhou 职业/高段位牌谱对切牌/立直/吃/碰/杠逐决策监督学习，学人类动作分布作为基线。
+- **Reward**（pt 量纲，热可调）：Φ 差分 + 和牌轮 +0.5+min(20,打点/2000) − 被铳轮 −0.5−min(20,铳点/2000)。
+- **PPO Self-Play**：向量化（`--vec`，默认 4 局）；对手池 self 60% / past 25% / SL 15%；clip 0.2、GAE(0.99,0.95)、KL 早停 0.5、稀有动作加权 ≤8×、熵 0.01；bias-snap 归中防头冻结；always_win 先学"能和就和"。
+- **Hot Reload**：编辑 `logs/rl_hyper.json`（~10s 应用）免重启调节奖励/学习率/等。
+
+> **Observed behavior**：当前开发 checkpoint 表现出**激进、偏重吃碰（meld-heavy）**的打法（副露率高）。这是**观察到的行为特征**，不表示模型已"学会某种最优打法"。
+
+---
+
+## Evaluation
+
+- 主指标 **Mean Rank**（辅 Rank1 / pt 加权胜率），Bootstrap 95% CI。
+- 两阶段：pilot（3 seed × 500）→ main（5 seed × 1000）。
+- 防泄漏：预处理不跨 split、评估权重不可变、RL 对手池不含测试权重。
+- 协议详见 `docs/evaluation_protocol.md`；**本机未执行正式评估**。
+
+---
+
+## Historical Development
+
+早期开发运行曾记录一组初步表现数据（非最终协议、未复现）。**完整历史快照见 [`docs/history.md`](./docs/history.md)**，不作为正式科研结论的组成部分。
+
+---
+
+## Design Decisions
+
+- **Human logs** 提供行为先验；**SL** 提供初始策略；**Φ** 建模长视野结果价值；**PPO** 做自对弈改进；**对手池**降低对单一策略过拟合。
+- 评估与训练**分离**；实验可复现（one config ↔ commit ↔ checkpoint ↔ seeds）。
+- **没有最终 multi-seed 评估就不作科学结论**。
+
+---
+
+## Limitations
+
+- 大型 RL 重训暂缓；最终 multi-seed RL-vs-SL 评估**未完成**。
+- Ablation 研究**未完成**；Human 对比止于行为统计，本次发布未运行。
+- 数据与 SL 基线 checkpoint 不随仓库分发。
+
+---
+
+## Repository Structure
+
 ```
-r = Φ差分(局面→最终pt)
-  + 和牌轮: +0.5(基础奖) + min(20, 0.5×打点/1000)     # 高打点充分区分
-  − 被铳轮: −0.5(基础罚) − min(20, 0.5×铳点/1000)     # 与和牌对称
+src/    → agent/policy.py, env/riichi_game.py, model/(net/features/attn/rl_reward/train_rl_vec/…), tenhou/, riichi/
+tools/  → eval_vs_sl, eval_sliding, train_reward_pred, rl_panel_server, start_rl_train, rl_watchdog, …
+docs/   → evaluation_protocol, experiment_versions, history, tenhou_rules_authoritative, data_license_check, gpu_runbook, …
+tests/  → 引擎 oracle 回归测试（28 文件 / 65 测试函数）
+configs/→ schema.json + rl_v1 / rl_v1_event_attn / rl_v1_reward_full
+models/ → kamikaze_rl_v1_fp16.pt（已分发 RL checkpoint）
 ```
 
-### PPO 自对弈（src/model/train_rl_vec.py）
-- 向量化并行（`--vec`，默认 4 局）；对手池 self 60% / past 25%（历史版本）/ SL 15%
-- PPO：clip 0.2、GAE(0.99, 0.95)、KL 早停 0.5、稀有动作加权 ≤8×、熵 0.01
-- bias-snap 归中防头冻结/两极分化；head_z_cap 软限幅防失控
-- always_win 阶段：荣和/自摸强制（先学"能和就和"）
+完整规则说明见 `docs/tenhou_rules_authoritative.md`；到天凤规则差异与许可见 `docs/data_license_check.md`。
 
-### 热干预（免重启）
-编辑 `logs/rl_hyper.json`（每 ~10s 应用）：奖励 6 参数 / 学习率 / bias / snap_exclude / head_z_cap / always_win / reset_heads / pause / quit / 评估口径。
-
-## 历史开发进展
-
-早期开发运行（单 GPU，约 43% 计划局数）曾记录一组**初步**表现数据（如 vs-SL 平均顺位 ≈ 2.50）。作为开发过程的中间快照，完整数据保留在 [`docs/history.md`](./docs/history.md)，**未**在最终 multi-seed 协议下复现，**不构成**科研结论。
-
-> 正式 Scientific Evaluation 未执行——见 [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)。
-
-## 目录结构
-```
-src/   → agent/policy.py, env/riichi_game.py, model/(net/features/rl_reward/train_rl_vec/…), tenhou/, riichi/
-tools/ → eval_vs_sl, eval_sliding, train_reward_pred, rl_train_dashboard, start_rl_train, rl_watchdog, …
-docs/  → 架构/方案/规则差异/数据许可文档
-tests/ → 引擎 oracle 回归测试（28 文件 / 65 个测试函数）
-```
-
-## 数据集
-
-**来源**：天凤（Tenhou）公开对局日志（2026-01 日期段，60 个日期文件）。
-
-**规模与用途**：
-| 数据集 | 规模 | 用途 |
-|---|---|---|
-| transfer_records（处理后的逐决策记录）| **27,579 局** | Φ 奖励预测器训练（tools/train_reward_pred.py）|
-| Tenhou 原始日志 | 同源 | 数据校验/规则 oracle 验证/评估参照 |
-
-**记录格式**（data/processed/transfer_records/records-*.jsonl.gz，JSON 行 + gzip）：
-每行 = 一个玩家的一个决策时刻的完整可观察状态：`seat / round / honba / scores / oya / riichi_sticks / wall_left / dora_indicators / hand / melds / discards / legal_actions / label`（label 为人类实际采取的动作）。
-
-**处理管线**：src/tenhou/（下载 → 解析 mjlog → 校验 → 提取逐决策记录）；
-数据不随仓库分发（体积大），需自行按 docs/data_license_check.md 获取天凤日志后重跑管线。
-
-**许可**：天凤日志为公开数据；使用条款详见 docs/data_license_check.md。
-
-## 数据与许可
-- 训练数据：天凤（Tenhou）公开对局日志（详见 docs/data_license_check.md）
-- 引擎与天凤规则差异（完整差异清单，高优先级项已对齐、剩余低优先项见文档）：docs/tenhou_rules_authoritative.md
+---
 
 ## 致谢与参考
-- 架构参考：Suphx（arXiv:2003.13590）、mjai 协议、mahjong 库
+
+- 架构参考：**Suphx**（arXiv:2003.13590）、**mjai** 协议、mahjong 库。
+- 项目署名与引用：`CITATION.cff`；LICENSE：MIT（代码部分）。
